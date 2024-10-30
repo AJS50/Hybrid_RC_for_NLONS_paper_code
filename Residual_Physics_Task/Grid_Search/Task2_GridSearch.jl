@@ -3,36 +3,36 @@ include("$(pwd())/src/HybridRCforNLONS.jl")
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles
 import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!
 
-
 # arrayindex=1
-arrayindex=parse(Int,ARGS[1]) #where in the parameter sweep are we? (1-20)
+arrayindex=parse(Int,ARGS[1]) #where in the grid search? (1-8)
 
-# psweep_name="SpectralRadius"
-psweep_name=ARGS[2] #to select parameter settings according to the settings csv files. See settings files names for correct names.
+psweep_name="GridSearch"
 
-# ground_truth_case=3 
-ground_truth_case=parse(Int64,ARGS[3]) # regimes: 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
+# ground_truth_case=3 # 1.Synch, 3.Heteroclinic, 4.SCPS (2.asynch not used)
+ground_truth_case=parse(Int64,ARGS[3]) # 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
 
-input_path=ARGS[4] #path to settings and ground truth files
+# input_path="./"
+input_path=ARGS[4] #where the settings and ground truth data is stored.
 
-output_path=ARGS[5] #path to parent folder to store output valid times and trajectories. Will generate subfolders for each parameter.
+# output_path="./"
+output_path=ARGS[5] #path to parent location to store output. GridSearch folder will be created here.
 
-# model_type="Standard"# ODE, Hybrid, Standard.
-model_type=ARGS[6] # ODE, Hybrid, Standard.
+# model_type="Standard"
+model_type=ARGS[6] #Hybrid, Standard.
 
-#create parameter specific subfolder in the output path.
-save_path=output_path*psweep_name*"/"
+save_path=output_path*"/"*psweep_name*"/"
 if isdir(save_path)
     println("Directory $(psweep_name) exists")
 else
     mkdir(save_path)
 end
 
-# num_instantiations=40 #how many reservoir or ODE instantiations to test. reduce for quick tests.
-num_instantiations=1
-# num_tests=20 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
-num_tests=2
+
+num_instantiations=40 #number of reservoirs to create and test
+
+num_tests=20 #number of test spans to predict. maximum 20, as ground truth is split into 20 warmup-test segments.
 cases=["Synch","Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony"]
+
 case=cases[ground_truth_case]
 γ_1s=[2*Float64(pi),Float64(pi),1.3,1.5]
 γ_1=γ_1s[ground_truth_case]
@@ -45,15 +45,13 @@ N,K,system,μ,Δω,res_size,scaling,knowledge_ratio,data_dim,model_dim,spectral_
 g=1.0
 system=getfield(HybridRCforNLONS,Symbol(system))
 
-#we are testing the residual physics by using ground truth from the biharmonic model.
-#base parameters are therefore from the standard kuramoto model for the ODE and hybrid expert model.
+#base parameters are for the standard kuramoto model, as this is used by the hybrid expert model and ODE model.
 base_params=cartesian_kuramoto_p(MersenneTwister(1234+ground_truth_case),N,μ,Δω,K)
-#create set of modified/innacurate model parameters for the 20 cases (reservoirs or ODE's)
+#create set of modified/innacurate model parameters for the 40 cases (reservoirs or ODE's)
 #error distributions to sample from based on this run's settings
 ω_err_dist=Normal(0.0,omega_err)
 K_err_dist=Normal(0.0,K_err)
 
-#multiplicative parameter error is still present in the residual physics task (task 2)
 modified_params=Vector{Any}(undef,num_instantiations)
 for i in 1:num_instantiations
     modified_params[i]=deepcopy(base_params)
@@ -83,28 +81,28 @@ for i in 1:20
     warmup_data[i]=warmup_test_data[:,shift+1-warmup_len+(test_len+shift)*(i-1):shift+(test_len+shift)*(i-1)]
 end
 
-#save trajectories for inspection? reasonably large storage required. approx 300Gb for 20x2500step tests, 40 reservoirs, 10 oscillators.
-save_trajectories=false
-
-#for reservoir initialisation.
 reservoir_rng=MersenneTwister(1234+arrayindex)
 
-#for valid time computation
+#save trajectores for inspection or other error metric computation?
+save_trajectories=false
+
+#threhold for valid time calculation
 threshold=0.4
 
 #run the tests!
-if model_type=="ODE"
+if model_type=="ODE" #kept from parameter sweep if needed, but ODE was not tested on the grid search in the paper.
     #for each of the parameter combinations, for each of the test spans, start from it's initial condition, and run a simulation until time = 250.0. with saveat=0.1
     dt=0.1
     #20 tests in rows, each column is a reservoir/instance.
-    valid_times=Array{Float64,2}(undef,num_tests,num_instantiations)
+    valid_times_per_test_per_reservoir=Array{Float64,2}(undef,num_tests,num_instantiations)
     for test_num in 1:num_tests
+        println("model_type: $model_type test: ",test_num)
         ode_prediction=Array{Float64,2}(undef,test_len,num_instantiations*data_dim)
         for run_num in 1:num_instantiations
             sol=generate_ODE_data(system,test_data[test_num][:,1],modified_params[run_num],(0.0,249.9),1e7,dt)
             sol=permutedims(reduce(hcat,sol.u))
             ode_prediction[:,1+(data_dim*(run_num-1)):data_dim+(data_dim*(run_num-1))]=sol
-            valid_times[test_num,run_num]=valid_time(threshold,permutedims(sol),test_data[test_num],dt)
+            valid_times_per_test_per_reservoir[test_num,run_num]=valid_time(threshold,permutedims(sol),test_data[test_num],dt)
         end
         if save_trajectories
             local name=psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_predictions_test_$(test_num)_array_index_$(arrayindex)"
@@ -113,13 +111,13 @@ if model_type=="ODE"
             rm(save_path*name*".csv")
         end
     end
-    #save the valid times for each reservoir/instance across the 20 tests.
+    #save the valid times for each reservoir/instance across the 20 tests. (rows=tests, columns=reservoirs)
     name=psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_valid_times_array_index_$(arrayindex)"
-    CSV.write(save_path*name*".csv",DataFrame(valid_times,:auto),writeheader=true)
+    CSV.write(save_path*name*".csv",DataFrame(valid_times_per_test_per_reservoir,:auto),writeheader=true)
 
 elseif model_type=="Standard"
-    #create 40 standard ESN's with the modified parameters and the same reservoir size and connectivity.
-    #train each of them on the training data, and then predict the 20 test spans.
+    #create 20 standard ESN's with the modified parameters and the same reservoir size and connectivity.
+    #train each of them on the training data, and then predict the 20 test spans. save the predictions as csv's.
     #train all the reservoirs first
     reservoirs=Vector{ESN}()
     for res_idx in 1:num_instantiations
@@ -129,14 +127,15 @@ elseif model_type=="Standard"
         train_reservoir!(reservoirs[res_idx],target_data)
     end
     #20 tests in rows, each column is a reservoir/instance.
-    valid_times=Array{Float64,2}(undef,num_tests,num_instantiations)
+    valid_times_per_test_per_reservoir=Array{Float64,2}(undef,num_tests,num_instantiations)
     for test_num in 1:num_tests
+        println("model_type: $model_type test: ",test_num)
         test_prediction=Array{Float64,2}(undef,test_len,num_instantiations*data_dim)
         for run_num in 1:num_instantiations
             ingest_data!(reservoirs[run_num],warmup_data[test_num])
             standard_prediction=predict!(reservoirs[run_num],test_len,false,true)
             test_prediction[:,1+(data_dim*(run_num-1)):data_dim+(data_dim*(run_num-1))]=permutedims(standard_prediction)
-            valid_times[test_num,run_num]=valid_time(threshold,standard_prediction,test_data[test_num],dt)
+            valid_times_per_test_per_reservoir[test_num,run_num]=valid_time(threshold,standard_prediction,test_data[test_num],dt)
         end
         if save_trajectories
             local name=psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_predictions_test_$(test_num)_array_index_$(arrayindex)"
@@ -145,13 +144,13 @@ elseif model_type=="Standard"
             rm(save_path*name*".csv")
         end
     end
-    #save the valid times for each reservoir/instance across the 20 tests.
+    #save the valid times for each reservoir/instance across the 20 tests. (rows=tests, columns=reservoirs)
     name=psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_valid_times_array_index_$(arrayindex)"
-    CSV.write(save_path*name*".csv",DataFrame(valid_times,:auto),writeheader=true)
+    CSV.write(save_path*name*".csv",DataFrame(valid_times_per_test_per_reservoir,:auto),writeheader=true)
 # 
 elseif model_type=="Hybrid"
-    # create 40 hybrid ESN's with the modified parameters and the same reservoir size and connectivity.
-    # train each of them on the training data, and then predict the 20 test spans.
+    # create 20 hybrid ESN's with the modified parameters and the same reservoir size and connectivity.
+    # train each of them on the training data, and then predict the 20 test spans. save the predictions as csv's.
     reservoirs=Vector{Hybrid_ESN}()
     for res_idx in 1:num_instantiations
         push!(reservoirs,Hybrid_ESN(res_size,mean_degree,model_dim,data_dim,knowledge_ratio,spectral_radius,scaling,g,reg_param,sqr_even_indices,system,modified_params[res_idx],dt))
@@ -160,14 +159,15 @@ elseif model_type=="Hybrid"
         train_reservoir!(reservoirs[res_idx],target_data)
     end
     #20 tests in rows, each column is a reservoir/instance.
-    valid_times=Array{Float64,2}(undef,num_tests,num_instantiations)
+    valid_times_per_test_per_reservoir=Array{Float64,2}(undef,num_tests,num_instantiations)
     for test_num in 1:num_tests
+        println("model_type: $model_type test: ",test_num)
         test_prediction=Array{Float64,2}(undef,test_len,num_instantiations*data_dim)
         for run_num in 1:num_instantiations
             ingest_data!(reservoirs[run_num],warmup_data[test_num])
             hybrid_prediction=predict!(reservoirs[run_num],test_len,false,true)
             test_prediction[:,1+(data_dim*(run_num-1)):data_dim+(data_dim*(run_num-1))]=permutedims(hybrid_prediction)
-            valid_times[test_num,run_num]=valid_time(threshold,hybrid_prediction,test_data[test_num],dt)
+            valid_times_per_test_per_reservoir[test_num,run_num]=valid_time(threshold,hybrid_prediction,test_data[test_num],dt)
         end
         if save_trajectories
             local name=psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_predictions_test_$(test_num)_array_index_$(arrayindex)"
@@ -176,7 +176,7 @@ elseif model_type=="Hybrid"
             rm(save_path*name*".csv")
         end
     end
-    #save the valid times for each reservoir/instance across the 20 tests.
+    #save the valid times for each reservoir/instance across the 20 tests. (rows=tests, columns=reservoirs)
     name=psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_valid_times_array_index_$(arrayindex)"
-    CSV.write(save_path*name*".csv",DataFrame(valid_times,:auto),writeheader=true)
+    CSV.write(save_path*name*".csv",DataFrame(valid_times_per_test_per_reservoir,:auto),writeheader=true)
 end

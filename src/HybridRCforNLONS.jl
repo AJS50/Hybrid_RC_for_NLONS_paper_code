@@ -368,7 +368,6 @@ module HybridRCforNLONS
     function ModelStep!(reservoir::Hybrid_ESN)
         prob=ODEProblem(reservoir.model,reservoir.current_model_state,(0.0,reservoir.dt),reservoir.model_parameters)
         sol=solve(prob,Tsit5())
-        
         return(sol.u[end])
     end
 
@@ -419,7 +418,6 @@ module HybridRCforNLONS
         reservoir.model_state_history=Matrix{Float64}(undef,reservoir.model_dim,number_of_data_points)
         reservoir.current_state=zeros(reservoir.res_size)
         reservoir.state_history[:,1]=reservoir.current_state
-
         for (i,instance) in enumerate(eachcol(data))
             reservoir.current_model_state=instance
             reservoir.model_state_history[:,i]=ModelStep!(reservoir)
