@@ -1,7 +1,7 @@
 using Pkg; Pkg.activate(".")
 include("$(pwd())/src/HybridRCforNLONS.jl")
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles, DynamicalSystems, Plots
-import HybridRCforNLONS: valid_time, reset_affect1, reset_condition1, reset_affect2, reset_condition2, phasetoxy, xytophase, lorentzian_nat_freqs, sqr_even_indices
+import HybridRCforNLONS: valid_time, reset_affect1!, reset_condition1, reset_affect2!, reset_condition2, phasetoxy, xytophase, lorentzian_nat_freqs, sqr_even_indices
 
 ### Define new multistep reservoir struct. 'steps_per_step' is the number of internal steps per external step.
 mutable struct ESN_Multi
@@ -176,8 +176,8 @@ dt=0.1
 μ=0.0
 Δω=0.01
 reset_callback=CallbackSet(
-        VectorContinuousCallback(reset_condition1,HybridRCforNLONS.reset_affect1!,N),
-        VectorContinuousCallback(reset_condition2,HybridRCforNLONS.reset_affect2!,N)
+        VectorContinuousCallback(reset_condition1,reset_affect1!,N),
+        VectorContinuousCallback(reset_condition2,reset_affect2!,N)
         )
 
 #build 4 coupled ODE systems for the 4 different cases.

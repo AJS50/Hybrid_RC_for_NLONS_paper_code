@@ -14,7 +14,7 @@ using OrdinaryDiffEq, Random, DataFrames, CSV, Arrow
 
 #these are therefore 4 models for now. with some given random seed generating the natural frequencies from a lorentzian distribution. (1234+i) with i = [1,2,3,4] for synch, asynch, HC, SCPS
 
-output_path="./"
+output_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
 
 γ_1s=[2*Float64(pi),Float64(pi),1.3,1.5]
 γ_2=Float64(pi)

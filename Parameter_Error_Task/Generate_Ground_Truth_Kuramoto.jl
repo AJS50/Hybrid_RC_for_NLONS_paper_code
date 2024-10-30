@@ -6,9 +6,9 @@ using OrdinaryDiffEq, Random, CSV, Arrow, DataFrames
 #read in command line arguments
 idx=1
 idx=parse(Int64,ARGS[1]) #read in index defining the ground truth model regime: 1= regime 2=asynchronous, 2=regime 7=multi-frequency, 3=regime16=synchronous 
-input_path="./"
+input_path="$(pwd())/Parameter_Error_Task/Settings_and_GroundTruth/"
 input_path=ARGS[2]
-output_path="./"
+output_path="$(pwd())/Parameter_Error_Task/Settings_and_GroundTruth/"
 output_path=ARGS[3] #read in absolute path to store results in.
 
 N=5 #number of oscillators
