@@ -1,26 +1,26 @@
 using Pkg; Pkg.activate(".")
 include("$(pwd())/src/HybridRCforNLONS.jl")
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles
-import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!
+import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!, phasetoxy,xytophase,valid_time
 
 
-# arrayindex=1
-arrayindex=parse(Int,ARGS[1]) #where in the parameter sweep are we? (1-20)
+arrayindex=1
+# arrayindex=parse(Int,ARGS[1]) #where in the parameter sweep are we? (1-20)
 
-# psweep_name="SpectralRadius"
-psweep_name=ARGS[2] #to select parameter settings according to the settings csv files. See settings files names for correct names.
+psweep_name="SpectralRadius"
+# psweep_name=ARGS[2] #to select parameter settings according to the settings csv files. See settings files names for correct names.
 
-# ground_truth_case=3 
-ground_truth_case=parse(Int64,ARGS[3]) # regimes: 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
+ground_truth_case=3 
+# ground_truth_case=parse(Int64,ARGS[3]) # regimes: 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
 
-# input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
-input_path=ARGS[4] #path to settings and ground truth files
+input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
+# input_path=ARGS[4] #path to settings and ground truth files
 
-# output_path="$(pwd())/Residual_Physics_Task/"
-output_path=ARGS[5] #path to parent folder to store output valid times and trajectories. Will generate subfolders for each parameter.
+output_path="$(pwd())/Residual_Physics_Task/"
+# output_path=ARGS[5] #path to parent folder to store output valid times and trajectories. Will generate subfolders for each parameter.
 
-# model_type="Standard"# ODE, Hybrid, Standard.
-model_type=ARGS[6] # ODE, Hybrid, Standard.
+model_type="Standard"# ODE, Hybrid, Standard.
+# model_type=ARGS[6] # ODE, Hybrid, Standard.
 
 #create parameter specific subfolder in the output path.
 save_path=output_path*psweep_name*"/"

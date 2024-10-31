@@ -1,25 +1,25 @@
 using Pkg; Pkg.activate(".")
 include("$(pwd())/src/HybridRCforNLONS.jl")
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles
-import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!
+import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!,sqr_even_indices
 
 #The parameter sweeps were run using SLURM array jobs, with arrayindex being the ${SLURM_ARRAY_TASK_ID} from the job.
 
 #read in command line arguments
 arrayindex=20
-arrayindex=parse(Int64,ARGS[1]) #where in the parameter sweep are we?  (1-20)
+# arrayindex=parse(Int64,ARGS[1]) #where in the parameter sweep are we?  (1-20)
 psweep_name="KError"
-psweep_name=ARGS[2] #read in name of parameter sweep to be run. this will be used to load in the appropriate csv's with parameter settings. See settings file titles for correct naming.
-base_model=2
-base_model=parse(Int64,ARGS[3]) #which of the three regimes is used as ground truth and expert ODE model ? #Model2=asynchronous, Model7=multi-frequency, Model16=synchronous
+# psweep_name=ARGS[2] #read in name of parameter sweep to be run. this will be used to load in the appropriate csv's with parameter settings. See settings file titles for correct naming.
+base_model=16
+# base_model=parse(Int64,ARGS[3]) #which of the three regimes is used as ground truth and expert ODE model ? #Model2=asynchronous, Model7=multi-frequency, Model16=synchronous
 input_path="$(pwd())/Parameter_Error_Task/Settings_and_GroundTruth/"
-input_path=ARGS[4] #location of csv's with parameter settings and ground truth data.
+# input_path=ARGS[4] #location of csv's with parameter settings and ground truth data.
 output_path="$(pwd())/Parameter_Error_Task/"
-output_path=ARGS[5] #path to store results in.
-eval_type="Hybrid"
-eval_type=ARGS[6] #read in type of evaluation to be done. "ODE" or "Standard" or "Hybrid" (to allow parallisation across jobs.) each will regenerate the ground truth for now, but will see how much better Arrow is for storage and consider saving it.
+# output_path=ARGS[5] #path to store results in.
+eval_type="ODE"
+# eval_type=ARGS[6] #read in type of evaluation to be done. "ODE" or "Standard" or "Hybrid" (to allow parallisation across jobs.) each will regenerate the ground truth for now, but will see how much better Arrow is for storage and consider saving it.
 num_reservoirs=1
-num_reservoirs=parse(Int64,ARGS[7]) #how many reservoir or ODE instantiations to test. reduce to run quick test.
+# num_reservoirs=parse(Int64,ARGS[7]) #how many reservoir or ODE instantiations to test. reduce to run quick test.
 num_tests=2 #number of test spans to predict, maximum 20 as the ground truth data is always the same. reduce to run quick test.
 
 output_path=output_path*"/"*psweep_name*"/"

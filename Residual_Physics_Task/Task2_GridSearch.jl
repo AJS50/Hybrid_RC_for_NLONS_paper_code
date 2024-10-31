@@ -1,26 +1,26 @@
 using Pkg; Pkg.activate(".")
 include("$(pwd())/src/HybridRCforNLONS.jl")
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles
-import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!
+import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!, valid_time,phasetoxy,sqr_even_indices
 
-# arrayindex=1
-arrayindex=parse(Int,ARGS[1]) #where in the grid search? (1-8)
+arrayindex=1
+# arrayindex=parse(Int,ARGS[1]) #where in the grid search? (1-8)
 
 psweep_name="GridSearch"
 
-# ground_truth_case=3 # 1.Synch, 3.Heteroclinic, 4.SCPS (2.asynch not used)
-ground_truth_case=parse(Int64,ARGS[3]) # 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
+ground_truth_case=3 # 1.Synch, 3.Heteroclinic, 4.SCPS (2.asynch not used)
+# ground_truth_case=parse(Int64,ARGS[2]) # 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
 
-# input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
-input_path=ARGS[4] #where the settings and ground truth data is stored.
+input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
+# input_path=ARGS[3] #where the settings and ground truth data is stored.
 
-# output_path="$(pwd())/Residual_Physics_Task/"
-output_path=ARGS[5] #path to parent location to store output. GridSearch folder will be created here.
+output_path="$(pwd())/Residual_Physics_Task/"
+# output_path=ARGS[4] #path to parent location to store output. GridSearch folder will be created here.
 
-# model_type="Standard"
-model_type=ARGS[6] #Hybrid, Standard.
+model_type="Standard"
+# model_type=ARGS[5] #Hybrid, Standard.
 
-save_path=output_path*"/"*psweep_name*"/"
+save_path=output_path*psweep_name*"/"
 if isdir(save_path)
     println("Directory $(psweep_name) exists")
 else
