@@ -9,7 +9,7 @@ module HybridRCforNLONS
     #evaluation methods
     export normalised_error, valid_time
     #data processing
-    export generate_ground_truth_data,generate_ODE_data, generate_arrow, generate_ODE_data_ExtKuramoto
+    export generate_ground_truth_data,generate_ODE_data_task1,generate_ODE_data_task2, generate_arrow, generate_ODE_data_ExtKuramoto
     #biharmonic kuramoto callbacks and order funcs:
     export reset_condition1, reset_affect1!, reset_condition2, reset_affect2!, complex_form, kuramoto_order2, get_order_params
 
@@ -508,13 +508,15 @@ module HybridRCforNLONS
         return sol
     end
 
-    # function generate_ODE_data(system::Function,ic::Vector{Float64},p,tspan::Tuple{Float64,Float64},maxiters::Float64,dt::Float64)
-        # prob=ODEProblem(system,ic,tspan,p)
-        # sol=solve(prob,alg=Tsit5(),saveat=dt,adaptive=false,dt=1/1024,maxiters=maxiters)
-        # return sol
-    # end
+    #for parameter error task
+    function generate_ODE_data_task1(system::Function,ic::Vector{Float64},p,tspan::Tuple{Float64,Float64},maxiters::Float64,dt::Float64)
+        prob=ODEProblem(system,ic,tspan,p)
+        sol=solve(prob,alg=Tsit5(),saveat=dt,adaptive=false,dt=1/1024,maxiters=maxiters)
+        return sol
+    end
 
-    function generate_ODE_data(system::Function,ic::Vector{Float64},p,tspan::Tuple{Float64,Float64},maxiters::Float64,dt::Float64)
+    #for residual physics task
+    function generate_ODE_data_task2(system::Function,ic::Vector{Float64},p,tspan::Tuple{Float64,Float64},maxiters::Float64,dt::Float64)
         prob=ODEProblem(system,ic,tspan,p)
         sol=solve(prob,alg=Rosenbrock23(),saveat=dt,adaptive=true,dtmax=1/32,maxiters=maxiters)
         return sol

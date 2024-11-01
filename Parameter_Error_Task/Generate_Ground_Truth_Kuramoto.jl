@@ -1,16 +1,15 @@
 using Pkg; Pkg.activate(".")
 include("$(pwd())/src/HybridRCforNLONS.jl")
-import .HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_ic, generate_ground_truth_data, generate_arrow
-using OrdinaryDiffEq, Random, CSV, Arrow, DataFrames
+import .HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_ic, generate_ground_truth_data, generate_arrow, cartesian_kuramoto_p
+using OrdinaryDiffEq, Random, CSV, Arrow, DataFrames, DelimitedFiles
 
 #read in command line arguments
-idx=1
+idx=2
 idx=parse(Int64,ARGS[1]) #read in index defining the ground truth model regime: 1= regime 2=asynchronous, 2=regime 7=multi-frequency, 3=regime16=synchronous 
 input_path="$(pwd())/Parameter_Error_Task/Settings_and_GroundTruth/"
-input_path=ARGS[2]
+# input_path=ARGS[2]
 output_path="$(pwd())/Parameter_Error_Task/Settings_and_GroundTruth/"
-output_path=ARGS[3] #read in absolute path to store results in.
-
+# output_path=ARGS[3] #read in absolute path to store results in.
 N=5 #number of oscillators
 tspan=(0.0,6200.0) #one large trajectory for each model will be generated. To be split into training, warmup and test segments as required.
 dt=0.1 #time step.
@@ -25,12 +24,21 @@ for j in 1:3
 
     #set parameters. First instance of each regime was found from its array index. 
     if j==1
-        settings=readdlm(input_path*psweep_name*"_sweep_settings.csv",',',header=true)[1]
+        settings=readdlm(input_path*"KError"*"_sweep_settings.csv",',',header=true)[1]
         N,K,model,μ,Δω,res_size,scaling,knowledge_ratio,data_dim,model_dim,spectral_radius,mean_degree,dt, K_err, omega_err=settings[1,:] 
         base_params=cartesian_kuramoto_p(rng,N,μ,Δω,K)
+        if i==2
+            base_params[6]=1.0 #set K.
+        elseif i==7
+            base_params[6]=2.0 #set K.
+        elseif i==16
+            base_params[6]=4.0 #set K.
+        end
     else
     #the other two are specified to match the quality of the regime manually, but with parameters still sampled randomly.
-        base_params=ones(Float64,6)
+        settings=readdlm(input_path*"KError"*"_sweep_settings.csv",',',header=true)[1]
+        N,K,model,μ,Δω,res_size,scaling,knowledge_ratio,data_dim,model_dim,spectral_radius,mean_degree,dt, K_err, omega_err=settings[1,:] 
+        base_params=cartesian_kuramoto_p(rng,N,μ,Δω,K)
         if i == 2 # - Model 2: Nat Freqs within [-1,+1], K=1.0 (asynch)
             base_params[1:5]=2.0.*rand(rng,5).-1.0
             base_params[6]=1.0 #set K.
@@ -51,7 +59,6 @@ for j in 1:3
     ic=cartesian_kuramoto_ic(N) #same initial conditions for every run (internally this uses a MersenneTwister rng with seed 1234)
     gt_data=generate_ground_truth_data(cartesian_kuramoto,ic,base_params,tspan,1e7,dt)
     gt_data=permutedims(reduce(hcat,gt_data.u))
-
     #write to csv and compress as arrow file.
     name="Model_$(model_names[idx])_$(j-1)_ground_truth_data"
     println("writing csv")

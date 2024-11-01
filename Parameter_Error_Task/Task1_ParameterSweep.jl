@@ -1,26 +1,26 @@
 using Pkg; Pkg.activate(".")
 include("$(pwd())/src/HybridRCforNLONS.jl")
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles
-import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!,sqr_even_indices
+import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data_task1, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!,sqr_even_indices
 
 #The parameter sweeps were run using SLURM array jobs, with arrayindex being the ${SLURM_ARRAY_TASK_ID} from the job.
 
 #read in command line arguments
-arrayindex=20
+arrayindex=10
 # arrayindex=parse(Int64,ARGS[1]) #where in the parameter sweep are we?  (1-20)
-psweep_name="KError"
+psweep_name="OmegaErrorLarge"
 # psweep_name=ARGS[2] #read in name of parameter sweep to be run. this will be used to load in the appropriate csv's with parameter settings. See settings file titles for correct naming.
-base_model=16
+base_model=7
 # base_model=parse(Int64,ARGS[3]) #which of the three regimes is used as ground truth and expert ODE model ? #Model2=asynchronous, Model7=multi-frequency, Model16=synchronous
 input_path="$(pwd())/Parameter_Error_Task/Settings_and_GroundTruth/"
 # input_path=ARGS[4] #location of csv's with parameter settings and ground truth data.
 output_path="$(pwd())/Parameter_Error_Task/"
 # output_path=ARGS[5] #path to store results in.
-eval_type="ODE"
+eval_type="Standard"
 # eval_type=ARGS[6] #read in type of evaluation to be done. "ODE" or "Standard" or "Hybrid" (to allow parallisation across jobs.) each will regenerate the ground truth for now, but will see how much better Arrow is for storage and consider saving it.
-num_reservoirs=1
+num_reservoirs=2
 # num_reservoirs=parse(Int64,ARGS[7]) #how many reservoir or ODE instantiations to test. reduce to run quick test.
-num_tests=2 #number of test spans to predict, maximum 20 as the ground truth data is always the same. reduce to run quick test.
+num_tests=1 #number of test spans to predict, maximum 20 as the ground truth data is always the same. reduce to run quick test.
 
 output_path=output_path*"/"*psweep_name*"/"
 if !isdir(output_path)
@@ -63,7 +63,7 @@ for j in 1:3 #loop over all three instantiations of the model regime.
     if j==1 #first regime instance was found from the array index rng parameters
         base_params=cartesian_kuramoto_p(param_rng,N,μ,Δω,K)
     else #the other two sampled from manually specified distributions.
-        base_params=ones(Float64,6)
+        base_params=cartesian_kuramoto_p(param_rng,N,μ,Δω,K)
         if base_model == 2 # - Model 2: Nat Freqs within [-1,+1], K=1.0 (asynch)
             base_params[1:5]=2.0.*rand(param_rng,5).-1.0
             base_params[6]=1.0
@@ -121,7 +121,7 @@ for j in 1:3 #loop over all three instantiations of the model regime.
         for test_num in 1:num_tests
             ode_prediction=Array{Float64,2}(undef,test_len,num_reservoirs*data_dim)
             for run_num in 1:num_reservoirs
-                sol=generate_ODE_data(cartesian_kuramoto,test_data[test_num][:,1],modified_params[run_num],(0.0,249.9),1e7,dt)
+                sol=generate_ODE_data_task1(cartesian_kuramoto,test_data[test_num][:,1],modified_params[run_num],(0.0,249.9),1e7,dt)
                 sol=permutedims(reduce(hcat,sol.u))
                 ode_prediction[:,1+(data_dim*(run_num-1)):data_dim+(data_dim*(run_num-1))]=sol
                 norm_errors_per_test_per_reservoir[test_num,run_num]=mean(normalised_error(permutedims(sol),test_data[test_num]))
@@ -187,7 +187,7 @@ for j in 1:3 #loop over all three instantiations of the model regime.
             test_prediction=Array{Float64,2}(undef,test_len,num_reservoirs*data_dim)
             for run_num in 1:num_reservoirs
                 ingest_data!(reservoirs[run_num],warmup_data[test_num])
-                hybrid_prediction=predict!(reservoirs[run_num],test_len,false)
+                hybrid_prediction=predict!(reservoirs[run_num],test_len,false,true)
                 test_prediction[:,1+(data_dim*(run_num-1)):data_dim+(data_dim*(run_num-1))]=permutedims(hybrid_prediction)
                 norm_errors_per_test_per_reservoir[test_num,run_num]=mean(normalised_error(hybrid_prediction,test_data[test_num]))
             end
