@@ -1,16 +1,16 @@
 using Pkg; Pkg.activate(".")
 include("$(pwd())/src/HybridRCforNLONS.jl")
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles
-import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!, phasetoxy,xytophase,valid_time
+import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data_task2, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!, phasetoxy,xytophase,valid_time, sqr_even_indices
 
 
 arrayindex=1
 # arrayindex=parse(Int,ARGS[1]) #where in the parameter sweep are we? (1-20)
 
-psweep_name="SpectralRadius"
+psweep_name="InputScaling"
 # psweep_name=ARGS[2] #to select parameter settings according to the settings csv files. See settings files names for correct names.
 
-ground_truth_case=3 
+ground_truth_case=4
 # ground_truth_case=parse(Int64,ARGS[3]) # regimes: 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
 
 input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
@@ -19,7 +19,7 @@ input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
 output_path="$(pwd())/Residual_Physics_Task/"
 # output_path=ARGS[5] #path to parent folder to store output valid times and trajectories. Will generate subfolders for each parameter.
 
-model_type="Standard"# ODE, Hybrid, Standard.
+model_type="Hybrid"# ODE, Hybrid, Standard.
 # model_type=ARGS[6] # ODE, Hybrid, Standard.
 
 #create parameter specific subfolder in the output path.
@@ -30,17 +30,18 @@ else
     mkdir(save_path)
 end
 
-# num_instantiations=40 #how many reservoir or ODE instantiations to test. reduce for quick tests.
-num_instantiations=1
-# num_tests=20 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
-num_tests=2
+num_instantiations=40 #how many reservoir or ODE instantiations to test. reduce for quick tests.
+num_instantiations=ARGS[7]
+
+num_tests=20 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
+num_tests=ARGS[8]
+
 cases=["Synch","Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony"]
 case=cases[ground_truth_case]
 γ_1s=[2*Float64(pi),Float64(pi),1.3,1.5]
 γ_1=γ_1s[ground_truth_case]
 γ_2=Float64(pi)
 a=0.2
-
 
 settings=readdlm(input_path*psweep_name*"_sweep_settings.csv",',',header=true)[1]
 N,K,system,μ,Δω,res_size,scaling,knowledge_ratio,data_dim,model_dim,spectral_radius,mean_degree,dt, K_err, omega_err, reg_param=settings[arrayindex,:] 
@@ -103,7 +104,7 @@ if model_type=="ODE"
     for test_num in 1:num_tests
         ode_prediction=Array{Float64,2}(undef,test_len,num_instantiations*data_dim)
         for run_num in 1:num_instantiations
-            sol=generate_ODE_data(system,test_data[test_num][:,1],modified_params[run_num],(0.0,249.9),1e7,dt)
+            sol=generate_ODE_data_task2(system,test_data[test_num][:,1],modified_params[run_num],(0.0,249.9),1e7,dt)
             sol=permutedims(reduce(hcat,sol.u))
             ode_prediction[:,1+(data_dim*(run_num-1)):data_dim+(data_dim*(run_num-1))]=sol
             valid_times[test_num,run_num]=valid_time(threshold,permutedims(sol),test_data[test_num],dt)
