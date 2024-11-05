@@ -246,17 +246,6 @@ module HybridRCforNLONS
         reservoir.current_state=zeros(reservoir.res_size)
     end
 
-    # function ingest_data!(reservoir::ESN,data::Matrix{Float64}) #for training or warmup... sets state history size to length of data being processed.
-    #     number_of_data_points=size(data,2)
-    #     reservoir.state_history=Matrix{Float64}(undef,reservoir.res_size,number_of_data_points)
-    #     reservoir.current_state=zeros(reservoir.res_size)
-    #     reservoir.state_history[:,1]=reservoir.current_state
-    #     for i in 1:number_of_data_points
-    #         update_state!(reservoir,data[:,i])
-    #         reservoir.state_history[:,i]=reservoir.current_state
-    #     end
-    # end
-
     function ingest_data!(reservoir::ESN,data::Matrix{Float64}) #for training or warmup... sets state history size to length of data being processed.
         number_of_data_points=size(data,2)
         reservoir.state_history=Matrix{Float64}(undef,reservoir.res_size,number_of_data_points)
@@ -422,7 +411,6 @@ module HybridRCforNLONS
             reservoir.current_model_state=instance
             reservoir.model_state_history[:,i]=ModelStep!(reservoir)
         end
-
         combined_input_data=vcat(reservoir.model_state_history,data)
         for i in 1:number_of_data_points
             update_state!(reservoir,combined_input_data[:,i])

@@ -6,25 +6,37 @@ All package information is contained in the project.toml and manifest.toml files
 
 Arrow v2.7.2
 CSV v0.10.14
-ChaosTools v3.1.2
-ColorSchemes v3.25.0
-DSP v0.7.9
 DataFrames v1.6.1
-DelayEmbeddings v2.7.4
 DelimitedFiles v1.9.1
-Distances v0.10.11
 Distributions v0.25.109
 DynamicalSystems v3.3.17
-GR v0.73.6
-LaTeXStrings v1.3.1
 OrdinaryDiffEq v6.84.0
-PlotlyBase v0.8.19
 PlotlyJS v0.18.13
 Plots v1.40.4
-ProgressMeter v1.10.2
 Revise v3.5.14
-ScikitLearn v0.7.0
-StatsBase v0.33.21
 LinearAlgebra
 Random
 Statistics v1.10.0
+
+
+using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles, DynamicalSystems, Plots
+using Plots, PlotlyJS, DelimtedFiles, Statistics
+using OrdinaryDiffEq, Random, DataFrames, CSV, Arrow
+using Distributions, Statistics,  Random, LinearAlgebra, OrdinaryDiffEq, Arrow, CSV, DataFrames
+
+#to remove from the project when sweep is done.
+ChaosTools v3.1.2
+ColorSchemes v3.25.0
+DSP v0.7.9
+DelayEmbeddings v2.7.4
+Distances v0.10.11
+GR v0.73.6
+LaTeXStrings v1.3.1
+PlotlyBase v0.8.19
+ProgressMeter v1.10.2
+ScikitLearn v0.7.0
+StatsBase v0.33.21
+Zygote
+ProgressLogging
+ForwardDiff
+DynamicAxisWarping
