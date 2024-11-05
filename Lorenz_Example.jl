@@ -20,8 +20,6 @@ t = collect(tspan[1]:dt:tspan[2])
 prob=ODEProblem(lorenz!, u0, tspan, p)
 sol = solve(prob, Tsit5(), saveat=t)
 sol=sol[1001:end] #remove initial transient
-#check ground truth
-plot(sol, idxs=(1,2,3), linewidth=1, legend=false,color=:black)
 
 #divide into train and test.
 train_data=reduce(hcat,sol[1:1000].u)
