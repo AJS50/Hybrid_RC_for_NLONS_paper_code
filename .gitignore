@@ -1,9 +1,6 @@
 *.csv
 *.svg
-*.out
 *.lz4
-*.sh
-*.o
 *.png
 *.gif
 *.pdf
