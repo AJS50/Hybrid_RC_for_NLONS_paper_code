@@ -9,16 +9,16 @@ model_type="all" #ODE, Standard, Hybrid all plotted together.
 # model_type = ARGS[2]
 
 
-arrayindex_range=1:3 #number of parameter settings tested.
+arrayindex_range=1:20 #number of parameter settings tested.
 # arrayindex_range=parse(Int64,ARGS[3]):parse(Int64,ARGS[4])
 
-test_num_range=1:6 #three regime instantiations, each 20 test spans. so 60 overall.
+test_num_range=1:60 #three regime instantiations, each 20 test spans. so 60 overall.
 # test_num_range=parse(Int64,ARGS[5]):3*parse(Int64,ARGS[6])
 
 
 input_path_base="$(pwd())/Parameter_Error_Task/" #parent folder with normalised error data in parameter specific folders.
 # input_path_base=ARGS[7]
-num_reservoirs=1
+num_reservoirs=40
 # num_reservoirs=parse(Int64,ARGS[8])
 
 three_models=[["2","2_1","2_2"],["7","7_1","7_2"],["16","16_1","16_2"]]
