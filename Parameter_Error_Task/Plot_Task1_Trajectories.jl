@@ -2,12 +2,13 @@ using Pkg; Pkg.activate(".")
 using Plots, Arrow, DataFrames
 plotlyjs()
 
-arrayindex=10
 arrayindex=ARGS[1]
+# arrayindex=10
 
-psweep_name="OmegaErrorLarge"
 psweep_name=ARGS[2]
+# psweep_name="OmegaErrorLarge"
 
+ground_truth_regime=ARGS[3]
 ground_truth_regime="asynchronous_0"#asynchronous_0" # asynchronous_0, _1, _2. synchronous_0, _1, _2. multi-frequency_0, _1, _2.
 if ground_truth_regime=="asynchronous_0"||ground_truth_regime=="asynchronous_1"||ground_truth_regime=="asynchronous_2"
     gt_index=1
@@ -17,15 +18,15 @@ else
     gt_index=2
 end
 
-test_num="1"
-test_num=ARGS[5]
+test_num=ARGS[4]
+# test_num="1"
 test_num_num=parse(Int64,test_num)
 
-input_path="$(pwd())/Parameter_Error_Task/"
-input_path=ARGS[6]
+instance_number=parse(Int64,ARGS[5])
+# instance_number=2
 
-instance_number=2
-instance_number=parse(Int64,ARGS[7])
+input_path="$(pwd())/Parameter_Error_Task/"
+# input_path=ARGS[6]
 
 label_fontsize=20
 title_fontsize=20

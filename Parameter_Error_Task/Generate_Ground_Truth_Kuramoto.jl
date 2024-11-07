@@ -4,12 +4,15 @@ import .HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_ic, generate_gr
 using OrdinaryDiffEq, Random, CSV, Arrow, DataFrames, DelimitedFiles
 
 #read in command line arguments
-idx=2
 idx=parse(Int64,ARGS[1]) #read in index defining the ground truth model regime: 1= regime 2=asynchronous, 2=regime 7=multi-frequency, 3=regime16=synchronous 
+# idx=2
+
 input_path="$(pwd())/Parameter_Error_Task/Settings_and_GroundTruth/"
 # input_path=ARGS[2]
+
 output_path="$(pwd())/Parameter_Error_Task/Settings_and_GroundTruth/"
 # output_path=ARGS[3] #read in absolute path to store results in.
+
 N=5 #number of oscillators
 tspan=(0.0,6200.0) #one large trajectory for each model will be generated. To be split into training, warmup and test segments as required.
 dt=0.1 #time step.
@@ -70,9 +73,9 @@ for j in 1:3
 end
 
 #test output: open data and plot
-using Plots
-j=0 #model instantiation number
-gt_read=Matrix(DataFrame(Arrow.Table(output_path*"Model_$(model_names[idx])_$(j)_ground_truth_data.arrow.lz4")))
-plot(gt_read[1:1000,1:5],label="",color=:blue,ylims=(-1.0,1.0))
-plot!(gt_read[1:1000,6:10],label="",color=:red)
+# using Plots
+# j=0 #model instantiation number
+# gt_read=Matrix(DataFrame(Arrow.Table(output_path*"Model_$(model_names[idx])_$(j)_ground_truth_data.arrow.lz4")))
+# plot(gt_read[1:1000,1:5],label="",color=:blue,ylims=(-1.0,1.0))
+# plot!(gt_read[1:1000,6:10],label="",color=:red)
 

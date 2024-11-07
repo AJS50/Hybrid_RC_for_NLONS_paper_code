@@ -51,7 +51,6 @@ for arrindex in 1:3 #plotting all regimes at once.
 
     if psweep_name=="all"
         parameters_to_plot=[ "KError","KErrorLarge", "OmegaError","OmegaErrorLarge", "ReservoirSize", "InputScaling", "KnowledgeRatio", "InputScalingLarge", "SpectralRadius","MeanDegree"]
-        parameters_to_plot=[ "KError"]
     else
         parameters_to_plot=[psweep_name]
     end
@@ -194,7 +193,7 @@ for arrindex in 1:3 #plotting all regimes at once.
 end
 
 psweep_idxs=collect(1:1:10)
-parameters_to_plot=[ "KError"]#,"KErrorLarge", "OmegaError","OmegaErrorLarge", "ReservoirSize", "InputScaling", "KnowledgeRatio", "InputScalingLarge", "SpectralRadius","MeanDegree"]
+parameters_to_plot=[ "KError","KErrorLarge", "OmegaError","OmegaErrorLarge", "ReservoirSize", "InputScaling", "KnowledgeRatio", "InputScalingLarge", "SpectralRadius","MeanDegree"]
 subplot_collection
 #Save supplementary figures S1-S7.
 for i in psweep_idxs #the shifts of 20 and 10 here, (and specific ordering) will pick out the particular parameter sweep, and plot the synchronous, asynchronous and multifrequency models next to each other in that order.

@@ -14,13 +14,15 @@ function phasetoxy(phases)
     return xys
 end
 
-arrayindex=1
-# arrayindex=ARGS[1]
+arrayindex=ARGS[1]
+# arrayindex=1
 
-psweep_name="InputScaling"
-# psweep_name=ARGS[2]
+psweep_name=ARGS[2]
+# psweep_name="InputScaling"
 
-ground_truth_regime="SelfConsistentPartialSynchrony" #Asynchronous, HeteroclinicCycles, SelfConsistentPartialSynchrony
+
+ground_truth_regime=ARGS[3]
+# ground_truth_regime="SelfConsistentPartialSynchrony" #Asynchronous, HeteroclinicCycles, SelfConsistentPartialSynchrony
 if ground_truth_regime=="Synchronous"
     gt_index=1
 elseif ground_truth_regime=="Asynchronous"
@@ -37,15 +39,17 @@ gt_type=["Synchronous","Asynchronous","Heteroclinic Cycles","Partial Synchrony"]
 base_models=["Synch","Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony"]
 base_model=base_models[gt_index]
 
-test_num="1"
-# test_num=ARGS[5]
+test_num=ARGS[5]
+# test_num="1"
 test_num_num=parse(Int64,test_num)
 
-input_path="$(pwd())/Residual_Physics_Task/"
-# input_path=ARGS[6]
+instance_number=parse(Int64,ARGS[6])
+# instance_number=1
 
-instance_number=1
-# instance_number=parse(Int64,ARGS[7])
+input_path="$(pwd())/Residual_Physics_Task/"
+# input_path=ARGS[7]
+
+
 
 label_fontsize=20
 title_fontsize=20

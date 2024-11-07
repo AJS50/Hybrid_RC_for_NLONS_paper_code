@@ -1,7 +1,8 @@
 using Pkg; Pkg.activate(".")
 using Plots, PlotlyJS, DelimtedFiles, Statistics
 
-input_path="./" #location of the files output from Mutlistep_Reservoir_test.jl.
+input_path="$(pwd())/Supplementary_Figures/" #location of the files output from Mutlistep_Reservoir_test.jl.
+output_path="$(pwd())/Supplementary_Figures/" #location to save the figure.
 
 #load the vts from the csvs
 vts_lorenz= readdlm(input_path*"vts_lorenz.csv",',')
@@ -29,4 +30,4 @@ plot!(mean(vts_opt_sr_is_reg,dims=1)[1,:],color=:green,linewidth=3,label="Hetero
 scatter!([[i for j in 1:30] for i in eachindex(eachcol(vts_opt_sr_is_reg))],vts_opt_sr_is_reg,label="",color=:green,markersize=marker_size,markeralpha=marker_alpha,markerstrokewidth=markerstrokewidth)
 plot!(mean(vts_opt_sr_is_reg_constsr,dims=1)[1,:],color=:purple,linewidth=3,label="Heteroclinic Cycles. Opt - constant effective SR",ribbon=(std(vts_opt_sr_is_reg_constsr,dims=1)[1,:],std(vts_opt_sr_is_reg_constsr,dims=1)[1,:]),fillalpha=0.2)
 scatter!([[i for j in 1:30] for i in eachindex(eachcol(vts_opt_sr_is_reg_constsr))],vts_opt_sr_is_reg_constsr,label="",color=:purple,markersize=marker_size,markeralpha=marker_alpha,markerstrokewidth=markerstrokewidth)
-savefig("Multistep_res_results_SansSerif.pdf")
+savefig("$(output_path)Multistep_reservoir_figure.pdf")

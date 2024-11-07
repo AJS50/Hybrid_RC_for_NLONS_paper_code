@@ -1,7 +1,7 @@
 include("$(pwd())/src/HybridRCforNLONS.jl")
 using Plots, Arrow, DataFrames
 input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
-output_path="$(pwd())/Residual_Physics_Task/"
+output_path="$(pwd())/Supplementary_Figures/"
 
 function xytophase(xys)
     N=Int64(size(xys)[1]/2)
@@ -46,16 +46,15 @@ plotlyjs()
 cases=["Synchronous","Asynchronous","Heteroclinic Cycles","Partial Synchrony"]
 space_time_plots=Vector{Any}()
 for (idx,case_gt) in enumerate(cases_gts)
-    #every tenth point:
-    time_distances_10th=Array{Float64,2}(undef,200,200)
-    space_distances_10th=Array{Float64,2}(undef,200,200)
+    time_distances=Array{Float64,2}(undef,200,200)
+    space_distances=Array{Float64,2}(undef,200,200)
     for i in 1:200
         for j in 1:200
-            space_distances_10th[i,j]=distance(case_gt[i*300,:],case_gt[j*300,:])
-            time_distances_10th[i,j]=abs(i*300-j*300)*dt
+            space_distances[i,j]=distance(case_gt[i*300,:],case_gt[j*300,:])
+            time_distances[i,j]=abs(i*300-j*300)*dt
         end
     end
-    p=plot(scatter(time_distances_10th,space_distances_10th,size=(1400,800),color=:purple,markerstrokewidth=0.00,markersize=1),legend=false)
+    p=plot(scatter(time_distances,space_distances,size=(1400,800),color=:purple,markerstrokewidth=0.00,markersize=1),legend=false)
     plot!(p,xlabel="Time separation (s)",ylabel="Euclidean distance",title="$(cases[idx])")
     plot!(p,tickfontsize=12,titlefontsize=18,labelfontsize=15,xticks=([0,1000,2000,3000,4000,5000,6000],["0","1000","2000","3000","4000","5000","6000"]),yticks=([0,1,2,3,4,5,6],["0","1","2","3","4","5","6"]))
     push!(space_time_plots,p)

@@ -3,7 +3,9 @@ include("$(pwd())/src/HybridRCforNLONS.jl")
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles, DynamicalSystems, Plots
 import HybridRCforNLONS: valid_time, reset_affect1!, reset_condition1, reset_affect2!, reset_condition2, phasetoxy, xytophase, lorentzian_nat_freqs, sqr_even_indices
 
-### Define new multistep reservoir struct. 'steps_per_step' is the number of internal steps per external step.
+output_path="$(pwd())/Supplementary_Figures/"
+
+### Define new multistep reservoir struct, based on the ESN struct, but with an extra 'steps_per_step' parameter that is the number of internal steps per external step.
 mutable struct ESN_Multi
     res_size::Int64
     mean_degree::Float64
@@ -41,6 +43,9 @@ mutable struct ESN_Multi
         
     end
 end
+
+
+## create initialisation, training, and prediction functions, as new dispatches of the original functions, for the multistep reservoir.
 
 function update_state!(reservoir::ESN_Multi,input::Vector{Float64})
     for i in 1:reservoir.steps_per_step
@@ -299,11 +304,11 @@ for i in 1:10
 end
 
 #save each of the valid time matrices in csv files:
-using DelimitedFiles
-writedlm("/Users/as15635/Documents/Projects/KnowledgeReservoirs2/test/MultiStepReservoirs/vts_lorenz.csv",vts_lorenz,',')
-writedlm("/Users/as15635/Documents/Projects/KnowledgeReservoirs2/test/MultiStepReservoirs/vts.csv",vts,',')
-writedlm("/Users/as15635/Documents/Projects/KnowledgeReservoirs2/test/MultiStepReservoirs/vts_opt_sr_is_reg.csv",vts_opt_sr_is_reg,',')
-writedlm("/Users/as15635/Documents/Projects/KnowledgeReservoirs2/test/MultiStepReservoirs/vts_opt_sr_is_reg_constsr.csv",vts_opt_sr_is_reg_constsr,',')
+
+writedlm("$(output_path)vts_lorenz.csv",vts_lorenz,',')
+writedlm("$(output_path)vts.csv",vts,',')
+writedlm("$(output_path)vts_opt_sr_is_reg.csv",vts_opt_sr_is_reg,',')
+writedlm("$(output_path)vts_opt_sr_is_reg_constsr.csv",vts_opt_sr_is_reg_constsr,',')
 
 
 

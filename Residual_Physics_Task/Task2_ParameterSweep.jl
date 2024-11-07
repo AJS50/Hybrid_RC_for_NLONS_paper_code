@@ -4,23 +4,29 @@ using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arr
 import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data_task2, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!, phasetoxy,xytophase,valid_time, sqr_even_indices
 
 
-arrayindex=1
-# arrayindex=parse(Int,ARGS[1]) #where in the parameter sweep are we? (1-20)
+arrayindex=parse(Int,ARGS[1]) #where in the parameter sweep are we? (1-20)
+# arrayindex=1
 
-psweep_name="InputScaling"
-# psweep_name=ARGS[2] #to select parameter settings according to the settings csv files. See settings files names for correct names.
+psweep_name=ARGS[2] #to select parameter settings according to the settings csv files. See settings files names for correct names.
+# psweep_name="InputScaling"
 
-ground_truth_case=4
-# ground_truth_case=parse(Int64,ARGS[3]) # regimes: 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
+ground_truth_case=parse(Int64,ARGS[3]) # regimes: 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
+# ground_truth_case=4
+
+model_type=ARGS[4] # ODE, Hybrid, Standard.
+# model_type="Hybrid"# ODE, Hybrid, Standard.
+
+num_instantiations=40 #how many reservoir or ODE instantiations to test. reduce for quick tests.
+# num_instantiations=ARGS[5]
+
+num_tests=20 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
+# num_tests=ARGS[6]
 
 input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
-# input_path=ARGS[4] #path to settings and ground truth files
+# input_path=ARGS[7] #path to settings and ground truth files
 
 output_path="$(pwd())/Residual_Physics_Task/"
-# output_path=ARGS[5] #path to parent folder to store output valid times and trajectories. Will generate subfolders for each parameter.
-
-model_type="Hybrid"# ODE, Hybrid, Standard.
-# model_type=ARGS[6] # ODE, Hybrid, Standard.
+# output_path=ARGS[8] #path to parent folder to store output valid times and trajectories. Will generate subfolders for each parameter.
 
 #create parameter specific subfolder in the output path.
 save_path=output_path*psweep_name*"/"
@@ -29,12 +35,6 @@ if isdir(save_path)
 else
     mkdir(save_path)
 end
-
-num_instantiations=40 #how many reservoir or ODE instantiations to test. reduce for quick tests.
-num_instantiations=ARGS[7]
-
-num_tests=20 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
-num_tests=ARGS[8]
 
 cases=["Synch","Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony"]
 case=cases[ground_truth_case]
