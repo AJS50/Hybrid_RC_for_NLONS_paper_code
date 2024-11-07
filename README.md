@@ -1,6 +1,6 @@
 # Hybrid_RC_for_NLONS_paper_code
 
-This is the code that can be used to prodiuce the results and figures of our paper "Modeling nonlinear oscillator networks using physics-informed hybrid reservoir computing".
+This is the code that can be used to prodiuce the results and figures of our paper "Modeling nonlinear oscillator networks using physics-informed hybrid reservoir computing". by Andrew Shannon, Conor Houghton, David Barton, and Martin Homer.
 
 ## Julia project use:
 
