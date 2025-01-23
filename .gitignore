@@ -5,3 +5,5 @@
 *.gif
 *.pdf
 *.csv
+*.o
+*.sh
