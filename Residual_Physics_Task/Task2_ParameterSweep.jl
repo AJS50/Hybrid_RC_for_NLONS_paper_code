@@ -1,3 +1,4 @@
+cd("..")
 using Pkg; Pkg.activate(".")
 include("$(pwd())/src/HybridRCforNLONS.jl")
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles
@@ -10,23 +11,23 @@ arrayindex=parse(Int,ARGS[1]) #where in the parameter sweep are we? (1-20)
 psweep_name=ARGS[2] #to select parameter settings according to the settings csv files. See settings files names for correct names.
 # psweep_name="InputScaling"
 
-ground_truth_case=parse(Int64,ARGS[3]) # regimes: 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
-# ground_truth_case=4
+ground_truth_case=parse(Int64,ARGS[3]) # regimes: 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS, 5.fast asynchronous
+# ground_truth_case=5
 
-model_type=ARGS[4] # ODE, Hybrid, Standard.
+model_type=ARGS[6] # ODE, Hybrid, Standard.
 # model_type="Hybrid"# ODE, Hybrid, Standard.
 
 num_instantiations=40 #how many reservoir or ODE instantiations to test. reduce for quick tests.
 # num_instantiations=ARGS[5]
 
-num_tests=20 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
+num_tests=5 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
 # num_tests=ARGS[6]
 
 input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
 # input_path=ARGS[7] #path to settings and ground truth files
 
-output_path="$(pwd())/Residual_Physics_Task/"
-# output_path=ARGS[8] #path to parent folder to store output valid times and trajectories. Will generate subfolders for each parameter.
+# output_path="$(pwd())/Residual_Physics_Task/"
+output_path=ARGS[5] #path to parent folder to store output valid times and trajectories. Will generate subfolders for each parameter.
 
 #create parameter specific subfolder in the output path.
 save_path=output_path*psweep_name*"/"
@@ -36,9 +37,9 @@ else
     mkdir(save_path)
 end
 
-cases=["Synch","Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony"]
+cases=["Synch","Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony","Asynch_Fast"]
 case=cases[ground_truth_case]
-γ_1s=[2*Float64(pi),Float64(pi),1.3,1.5]
+γ_1s=[2*Float64(pi),Float64(pi),1.3,1.5, Float64(pi)]
 γ_1=γ_1s[ground_truth_case]
 γ_2=Float64(pi)
 a=0.2
@@ -48,11 +49,16 @@ N,K,system,μ,Δω,res_size,scaling,knowledge_ratio,data_dim,model_dim,spectral_
 g=1.0
 system=getfield(HybridRCforNLONS,Symbol(system))
 
+if case=="Asynch_Fast"
+    Δω=0.05
+    K=5.0
+end
+
 #we are testing the residual physics by using ground truth from the biharmonic model.
 #base parameters are therefore from the standard kuramoto model for the ODE and hybrid expert model.
 base_params=cartesian_kuramoto_p(MersenneTwister(1234+ground_truth_case),N,μ,Δω,K)
 #create set of modified/innacurate model parameters for the 20 cases (reservoirs or ODE's)
-#error distributions to sample from based on this run's settings
+#error distributions to sample from based on this run's setting s
 ω_err_dist=Normal(0.0,omega_err)
 K_err_dist=Normal(0.0,K_err)
 
