@@ -31,9 +31,13 @@ callback=CallbackSet(
     VectorContinuousCallback(reset_condition2,reset_affect2!,N)
     )
     
-cases=["Synch","Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony"]
+cases=["Synch","Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony","Asynch_Fast"]
 for (cidx,case) in enumerate(cases)
     rng=MersenneTwister(1234+cidx)
+    if case=="Asynch_Fast"
+        Δω=0.05
+        K=5.0
+    end
     base_params=biharmonic_kuramoto_p(rng,N,μ,Δω,K,a,γ_1s[cidx],γ_2)
     ic=biharmonic_kuramoto_ic(N) #same initial conditions for every run (internally this uses a MersenneTwister rng with seed 1234)
     prob=ODEProblem(biharmonic_kuramoto,ic,tspan,base_params;callback=callback)
