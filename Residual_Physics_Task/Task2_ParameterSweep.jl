@@ -1,7 +1,7 @@
 using Pkg; Pkg.activate(".")
 include("$(pwd())/src/HybridRCforNLONS.jl")
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles
-import HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data_task2, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!, phasetoxy,xytophase,valid_time, sqr_even_indices
+import .HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data_task2, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!, phasetoxy,xytophase,valid_time, sqr_even_indices
 
 
 arrayindex=parse(Int,ARGS[1]) #where in the parameter sweep are we? (1-20)

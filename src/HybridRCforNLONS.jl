@@ -715,4 +715,28 @@ module HybridRCforNLONS
         N=number_neurons
         (1/N) .* sum(complex_form,solution,dims=1)
     end
+
+    function xytophase(xys)
+        N=Int64(size(xys)[1]/2)
+        phases=atan.(xys[N+1:2*N,:],xys[1:N,:])
+        return phases
+    end
+    
+    function phasetoxy(phases)
+        xys=reduce(vcat,vcat(cos.(phases),sin.(phases)))
+        return xys
+    end
+
+    """
+    Non linear function applied to reservoir states before ouput layer.
+        This squares the value of all even index states, and leaves the odd index states unchanged.
+    """
+    function sqr_even_indices(x)
+        y=copy(x)
+        for i in 2:2:size(y)[1]
+            y[i,:]=y[i,:].^2
+        end
+        return(y)
+    end
+
 end
