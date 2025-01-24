@@ -280,3 +280,11 @@ plot(abs.(async_fast_gt_order),label="Ground Truth Fast",color=:purple)
 plot!(abs.(async_fast_standard_order),label="Standard Fast",color=:blue)
 plot!(abs.(async_fast_hybrid_order),label="Hybrid Fast",color=:red)
 plot!(abs.(async_fast_ode_order),label="ODE Fast",color=:black)
+
+
+# #load ground truth fast async and plot it
+# gt_fa=Matrix(DataFrame(Arrow.Table("/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Asynch_Fast_ground_truth_data.arrow.lz4")))[:,1:10]
+# gt_fa=[phasetoxy(gt_fa'[:,i]) for i in 1:size(gt_fa',2)]
+# gt_fa=reduce(hcat,gt_fa)
+
+# plot(gt_fa'[1:1000,1:10])
