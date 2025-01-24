@@ -5,10 +5,10 @@ import .HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_e
 import .HybridRCforNLONS: biharmonic_kuramoto_p, biharmonic_kuramoto, biharmonic_kuramoto_ic, reset_condition1, reset_affect1!, reset_condition2, reset_affect2!, generate_arrow, xytophase,phasetoxy, kuramoto_order2
 plotlyjs()
 arrayindex=parse(Int,ARGS[1]) #where in the parameter sweep are we? (1-20)
-arrayindex=1
+arrayindex=20
 
 psweep_name=ARGS[2] #to select parameter settings according to the settings csv files. See settings files names for correct names.
-psweep_name="InputScaling"
+psweep_name="SpectralRadius"
 
 ground_truth_case=parse(Int64,ARGS[3]) # regimes: 1.Synch, 2.Asynch, 3.Heteroclinic, 4.SCPS
 ground_truth_case=5
@@ -16,10 +16,10 @@ ground_truth_case=5
 model_type=ARGS[4] # ODE, Hybrid, Standard.
 model_type="Hybrid"# ODE, Hybrid, Standard.
 
-num_instantiations=3 #how many reservoir or ODE instantiations to test. reduce for quick tests.
+num_instantiations=10 #how many reservoir or ODE instantiations to test. reduce for quick tests.
 # num_instantiations=ARGS[5]
 
-num_tests=1 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
+num_tests=5 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
 # num_tests=ARGS[6]
 
 input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
@@ -73,13 +73,23 @@ rng=MersenneTwister(1234+cidx)
 base_params=biharmonic_kuramoto_p(rng,N,μ,Δω,K,a,γ_1s[ground_truth_case],γ_2)
 ic=biharmonic_kuramoto_ic(N) #same initial conditions for every run (internally this uses a MersenneTwister rng with seed 1234)
 tspan=(0.0,6200.0)
-prob=ODEProblem(biharmonic_kuramoto,ic,tspan,base_params;callback=callback)
-gt_data=permutedims(reduce(hcat,solve(prob,Tsit5(),dtmax=1/32,adaptive=true,saveat=dt).u))
-import .HybridRCforNLONS: phasetoxy
-ground_truth=[phasetoxy(gt_data'[:,i]) for i in 1:size(gt_data',2)]
+# prob=ODEProblem(biharmonic_kuramoto,ic,tspan,base_params;callback=callback)
+# gt_data=permutedims(reduce(hcat,solve(prob,Tsit5(),dtmax=1/32,adaptive=true,saveat=dt).u))
+# import .HybridRCforNLONS: phasetoxy
+# ground_truth=[phasetoxy(gt_data'[:,i]) for i in 1:size(gt_data',2)]
+# ground_truth=reduce(hcat,ground_truth)
+
+#save the gt data as the correct ground truth:
+# name=psweep_name*"_Biharmonic_Kuramoto_$(case)_ground_truth_data"
+# CSV.write(save_path*name*".csv",DataFrame(gt_data,:auto),writeheader=true)
+# generate_arrow(name,save_path)
+# rm(save_path*name*".csv")
+#instead load the bad gt from the HPC.
+ground_truth=Matrix(DataFrame(Arrow.Table("/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Asynch_Fast_ground_truth_data.arrow.lz4")))
+ground_truth=[phasetoxy(ground_truth'[:,i]) for i in 1:size(ground_truth',2)]
 ground_truth=reduce(hcat,ground_truth)
 
-plot(gt_data[1:1000,1:10])
+# plot(gt_data[1:1000,1:10])
 train_len=1000
 warmup_len=100
 test_len=2500
@@ -95,11 +105,11 @@ for i in 1:20
     test_data[i]=warmup_test_data[:,shift+1+(test_len+shift)*(i-1):(test_len+shift)+(test_len+shift)*(i-1)]
     warmup_data[i]=warmup_test_data[:,shift+1-warmup_len+(test_len+shift)*(i-1):shift+(test_len+shift)*(i-1)]
 end
-plot(training_data[1:10,:]')
-plot(test_data[1][1:10,:]')
-plot(1:100,warmup_data[1][1:10,:]')
-plot!(101:2600,test_data[1][1:10,:]',color=:purple)
-plot!(xlims=(80,120))
+# plot(training_data[1:10,:]')
+# plot(test_data[1][1:10,:]')
+# plot(1:100,warmup_data[1][1:10,:]')
+# plot!(101:2600,test_data[1][1:10,:]',color=:purple)
+# plot!(xlims=(80,120))
 
 
 #we are testing the residual physics by using ground truth from the biharmonic model.
@@ -225,27 +235,29 @@ end
 
 
 #read in the data and plot the hybrid prediction against the ground truth 
+arrayindex=10
+instance_number=10
+test_num=5
 case=cases[5]
 cols=["black","blue","red"]
 to_plot_for_particular_regime=Vector{Any}()
 for (midx,model_type) in enumerate(["ODE","Standard","Hybrid"])
     case
-    traj=Matrix(DataFrame(Arrow.Table(save_path*psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_predictions_test_1_array_index_$(arrayindex).arrow.lz4")))
-    test_traj=test_data[1]'
+    traj=Matrix(DataFrame(Arrow.Table(save_path*psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_predictions_test_$(test_num)_array_index_$(arrayindex).arrow.lz4")))
+    test_traj=test_data[test_num]'
     p=plot(test_traj[:,1:10],label="",color=:purple);
-    plot!(p,traj[:,1:10],color=cols[midx],xlims=(0,100),size=(800,400),legend=nothing,title=model_type,label="");
-    plot!(p,xlims=(0,2500))
+    plot!(p,traj[:,1+20*(instance_number-1):10+20*(instance_number-1)],color=cols[midx],xlims=(0,100),size=(800,400),legend=nothing,title=model_type,label="");
+    plot!(p,xlims=(0,1000))
     push!(to_plot_for_particular_regime,p)
 end
 
 
-instance_number=1
-test_num=1
 
-bigplot=plot(to_plot_for_particular_regime...,layout=(2,2),plot_title=case,)
+
+bigplot=plot(to_plot_for_particular_regime...,layout=(2,2),plot_title="SpectralRadius - index $(arrayindex)")
 width,height=bigplot.attr[:size]
 Plots.prepare_output(bigplot)
-PlotlyJS.savefig(Plots.plotlyjs_syncplot(bigplot),"/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Figures/$(case)_trajectory_$(psweep_name)_instance_$(instance_number)_test_$(test_num)_array_index_$(arrayindex)_LONGTERM_FIXEDPOINTFAILURE.pdf",width=width,height=height)
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(bigplot),"/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Figures/$(case)_trajectory_$(psweep_name)_instance_$(instance_number)_test_$(test_num)_array_index_$(arrayindex)_WrongGTonHPC.pdf",width=width,height=height)
 
 
 #checking kuramoto order parameter of each in the fast asynch case and the normal async case to see if that is a good metric.
