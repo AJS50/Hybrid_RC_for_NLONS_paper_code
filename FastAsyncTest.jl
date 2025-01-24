@@ -72,6 +72,7 @@ end
 rng=MersenneTwister(1234+cidx)
 base_params=biharmonic_kuramoto_p(rng,N,μ,Δω,K,a,γ_1s[ground_truth_case],γ_2)
 ic=biharmonic_kuramoto_ic(N) #same initial conditions for every run (internally this uses a MersenneTwister rng with seed 1234)
+tspan=(0.0,6200.0)
 prob=ODEProblem(biharmonic_kuramoto,ic,tspan,base_params;callback=callback)
 gt_data=permutedims(reduce(hcat,solve(prob,Tsit5(),dtmax=1/32,adaptive=true,saveat=dt).u))
 import .HybridRCforNLONS: phasetoxy
@@ -224,7 +225,7 @@ end
 
 
 #read in the data and plot the hybrid prediction against the ground truth 
-case=cases[2]
+case=cases[5]
 cols=["black","blue","red"]
 to_plot_for_particular_regime=Vector{Any}()
 for (midx,model_type) in enumerate(["ODE","Standard","Hybrid"])
@@ -233,7 +234,7 @@ for (midx,model_type) in enumerate(["ODE","Standard","Hybrid"])
     test_traj=test_data[1]'
     p=plot(test_traj[:,1:10],label="",color=:purple);
     plot!(p,traj[:,1:10],color=cols[midx],xlims=(0,100),size=(800,400),legend=nothing,title=model_type,label="");
-    plot!(p,xlims=(0,1000))
+    plot!(p,xlims=(0,2500))
     push!(to_plot_for_particular_regime,p)
 end
 
@@ -244,7 +245,7 @@ test_num=1
 bigplot=plot(to_plot_for_particular_regime...,layout=(2,2),plot_title=case,)
 width,height=bigplot.attr[:size]
 Plots.prepare_output(bigplot)
-PlotlyJS.savefig(Plots.plotlyjs_syncplot(bigplot),"/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Figures/$(case)_trajectory_$(psweep_name)_instance_$(instance_number)_test_$(test_num)_array_index_$(arrayindex).pdf",width=width,height=height)
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(bigplot),"/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Figures/$(case)_trajectory_$(psweep_name)_instance_$(instance_number)_test_$(test_num)_array_index_$(arrayindex)_LONGTERM_FIXEDPOINTFAILURE.pdf",width=width,height=height)
 
 
 #checking kuramoto order parameter of each in the fast asynch case and the normal async case to see if that is a good metric.
@@ -270,21 +271,24 @@ async_fast_standard_order=kuramoto_order2(xytophase(async_fast_standard_trajecto
 async_slow_gt_order=kuramoto_order2(xytophase(async_slow_ground_truth),10)[1,:]
 async_fast_gt_order=kuramoto_order2(xytophase(async_fast_ground_truth),10)[1,:]
 
-plot(abs.(async_slow_gt_order),label="Ground Truth Slow",color=:purple)
-plot!(abs.(async_slow_hybrid_order),label="Hybrid Slow",color=:red)
-plot!(abs.(async_slow_ode_order),label="ODE Slow",color=:black)
-plot!(abs.(async_slow_standard_order),label="Standard Slow",color=:blue)
+p=plot(abs.(async_slow_gt_order),label="Ground Truth Slow",color=:purple)
+plot!(p,abs.(async_slow_hybrid_order),label="Hybrid Slow",color=:red)
+plot!(p,abs.(async_slow_ode_order),label="ODE Slow",color=:black)
+plot!(p,abs.(async_slow_standard_order),label="Standard Slow",color=:blue)
+plot!(p,ylabel="Synchrony",xlabel="Time Step",title="Asynchronous Slow")
+
+#plot and save the figure.
+width,height=p.attr[:size]
+Plots.prepare_output(p)
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Slow_Asynchronous_Order_$(psweep_name)_instance_$(instance_number)_test_$(test_num)_array_index_$(arrayindex).pdf",width=width,height=height)
 
 
-plot(abs.(async_fast_gt_order),label="Ground Truth Fast",color=:purple)
-plot!(abs.(async_fast_standard_order),label="Standard Fast",color=:blue)
-plot!(abs.(async_fast_hybrid_order),label="Hybrid Fast",color=:red)
-plot!(abs.(async_fast_ode_order),label="ODE Fast",color=:black)
+p=plot(abs.(async_fast_gt_order),label="Ground Truth Fast",color=:purple)
+plot!(p,abs.(async_fast_standard_order),label="Standard Fast",color=:blue)
+plot!(p,abs.(async_fast_hybrid_order),label="Hybrid Fast",color=:red)
+plot!(p,abs.(async_fast_ode_order),label="ODE Fast",color=:black)
+plot!(p,ylabel="Synchrony",xlabel="Time Step",title="Asynchronous Fast")
 
-
-# #load ground truth fast async and plot it
-# gt_fa=Matrix(DataFrame(Arrow.Table("/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Asynch_Fast_ground_truth_data.arrow.lz4")))[:,1:10]
-# gt_fa=[phasetoxy(gt_fa'[:,i]) for i in 1:size(gt_fa',2)]
-# gt_fa=reduce(hcat,gt_fa)
-
-# plot(gt_fa'[1:1000,1:10])
+width,height=p.attr[:size]
+Plots.prepare_output(p)
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Fast_Asynchronous_Order_$(psweep_name)_instance_$(instance_number)_test_$(test_num)_array_index_$(arrayindex).pdf",width=width,height=height)
