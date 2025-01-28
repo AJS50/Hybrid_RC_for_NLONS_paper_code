@@ -85,9 +85,16 @@ for arrindex in 5:5
             colour=colours[idx]
             collected_mean_errors=Array{Float64,2}(undef, length(arrayindex_range), num_reservoirs)
             for arrayindex in arrayindex_range
-                norm_errors=Matrix(DataFrame(CSV.read(input_path*param*"_"*model*"_"*"Biharmonic_Kuramoto"*"_"*base_model*"_valid_times_array_index_$(arrayindex).csv",DataFrame)))
-                mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
-                collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests    
+                # if arrayindex==15||arrayindex==16
+                    # arrayindex_replace=14
+                    # norm_errors=Matrix(DataFrame(CSV.read(input_path*param*"_"*model*"_"*"Biharmonic_Kuramoto"*"_"*base_model*"_valid_times_array_index_$(arrayindex_replace).csv",DataFrame)))
+                    # mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
+                    # collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests 
+                # else 
+                    norm_errors=Matrix(DataFrame(CSV.read(input_path*param*"_"*model*"_"*"Biharmonic_Kuramoto"*"_"*base_model*"_valid_times_array_index_$(arrayindex).csv",DataFrame)))
+                    mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
+                    collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests    
+                # end
             end
             scatter!(p,[get(pvalues_dict,param,"..")[arrayindex_range] for i in 1:size(collected_mean_errors,1)],collected_mean_errors,xticks=(pticks_locations[param],pticks_dict[param]), color=colour,label=nothing,markersize=2,markerstrokecolor=:match,markeralpha=0.45,markerstrokewidth=0.0,size=(560,480),dpi=300);
             if arrindex>=2
@@ -144,7 +151,7 @@ Plots.prepare_output(p)
 PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/Figures/residual_physics_parameter_sweep.pdf",width=width,height=height)
 
 #fast async only plot
-p=plot(plot_vector...,size=(840,1920),layout=(3,1),margin=2Plots.mm,left_margin=15mm,bottom_margin=14mm,legend_position=(0.915,0.97))
+p=plot(plot_vector...,size=(840,1920),layout=(4,1),margin=2Plots.mm,left_margin=15mm,bottom_margin=14mm,legend_position=(0.915,0.97))
 width, height = p.attr[:size]
 Plots.prepare_output(p)
 PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/Figures/residual_physics_parameter_sweep_async_fast.pdf",width=width,height=height)
