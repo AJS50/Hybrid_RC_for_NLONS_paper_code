@@ -20,7 +20,7 @@ model_type=ARGS[6] # ODE, Hybrid, Standard.
 num_instantiations=40 #how many reservoir or ODE instantiations to test. reduce for quick tests.
 # num_instantiations=ARGS[5]
 
-num_tests=5 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
+num_tests=20 #how many test spans to predict. maximum 20, as ground truth is always split into 20 warmup-test segments.
 # num_tests=ARGS[6]
 
 input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
@@ -93,7 +93,7 @@ for i in 1:20
 end
 
 #save trajectories for inspection? reasonably large storage required. approx 300Gb for 20x2500step tests, 40 reservoirs, 10 oscillators.
-save_trajectories=false
+save_trajectories=true
 
 #for reservoir initialisation.
 reservoir_rng=MersenneTwister(1234+arrayindex)
