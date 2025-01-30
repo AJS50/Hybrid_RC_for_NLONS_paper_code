@@ -8,7 +8,7 @@ original_base_model="all"
 # original_base_model = ARGS[2]
 model_type="all"
 # model_type = ARGS[3]
-test_num_range=1:5
+test_num_range=1:20
 # test_num_range=parse(Int64,ARGS[6]):parse(Int64,ARGS[7])
 input_path_base="$(pwd())/Residual_Physics_Task/"
 input_path_base="/user/work/as15635/output_data/ExtKuramoto/"
@@ -27,8 +27,8 @@ default(titlefontsize=20)
 
 plot_vector=Vector{Any}()
 
-case_letters=[["<b>a</b>","<b>e</b>","<b>i</b>","<b>m</b>"],["<b>b</b>","<b>f</b>","<b>j</b>","<b>n</b>"],["<b>c</b>","<b>g</b>","<b>k</b>","<b>o</b>"],["<b>d</b>","<b>h</b>","<b>l</b>","<b>p</b>"]]
-for arrindex in 5:5
+case_letters=[["<b>a</b>","<b>e</b>","<b>i</b>","<b>m</b>"],["<b>b</b>","<b>f</b>","<b>j</b>","<b>n</b>"],["<b>c</b>","<b>g</b>","<b>k</b>","<b>o</b>"],["<b>d</b>","<b>h</b>","<b>l</b>","<b>p</b>"],["<b>b</b>","<b>f</b>","<b>j</b>","<b>n</b>"]]
+for arrindex in [1,5,3,4]
     if original_base_model=="all"
         four_models=["Synch", "Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony","Asynch_Fast"]
         base_model=four_models[arrindex]
@@ -67,7 +67,7 @@ for arrindex in 5:5
     pticks_dict["ReservoirSize"]=(RS_ticks)[1:3:end]
     pticks_locations["ReservoirSize"]=pvalues_dict["ReservoirSize"][1:3:end]
 
-    model_titles=["Synchronous", "Asynchronous","Heteroclinic Cycles","Partial Synchrony","Asynch Fast"]
+    model_titles=["Synchronous", "Asynchronous","Heteroclinic Cycles","Partial Synchrony","Asynchronous"]
     parameters_sweep_names=["Spectral radius ","Input scaling","Regularisation","D<sub>r</sub>"]
     
     for (pidx,param) in enumerate(parameters_to_plot)
@@ -91,14 +91,20 @@ for arrindex in 5:5
                     # mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
                     # collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests 
                 # else 
-                    norm_errors=Matrix(DataFrame(CSV.read(input_path*param*"_"*model*"_"*"Biharmonic_Kuramoto"*"_"*base_model*"_valid_times_array_index_$(arrayindex).csv",DataFrame)))
-                    mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
-                    collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests    
+                    if base_model=="Asynch_Fast"
+                        norm_errors=Matrix(DataFrame(CSV.read(input_path*param*"_"*model*"_"*"Biharmonic_Kuramoto"*"_"*base_model*"_valid_times_array_index_$(arrayindex).csv",DataFrame)))
+                        mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
+                        collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests    
+                    else
+                        norm_errors=Matrix(DataFrame(CSV.read("/user/work/as15635/output_data/ExtKuramoto/"*"New_Error_Metrics/"*param*"_"*model*"_"*"ExtKuramoto"*"_"*base_model*"_mean_valid_times_arrayindex_$(arrayindex).csv",DataFrame)))
+                        mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
+                        collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests
+                    end
                 # end
             end
             scatter!(p,[get(pvalues_dict,param,"..")[arrayindex_range] for i in 1:size(collected_mean_errors,1)],collected_mean_errors,xticks=(pticks_locations[param],pticks_dict[param]), color=colour,label=nothing,markersize=2,markerstrokecolor=:match,markeralpha=0.45,markerstrokewidth=0.0,size=(560,480),dpi=300);
             if arrindex>=2
-                if arrindex==4||arrindex==5&&pidx==1
+                if arrindex==4&&pidx==1
                     plot!(p,get(pvalues_dict,param,"..")[arrayindex_range],title=model_titles[arrindex],titlefontsize=title_fontsize,mean(collected_mean_errors,dims=2),label=model,color=colour,linewidth=3,ribbon=std(collected_mean_errors,dims=2),fillalpha=0.3,legend=:right,xlabel=parameters_sweep_names[pidx],ylabel="", xtickfontsize=tickfontsize,ytickfontsize=tickfontsize,legendfontsize=legendfontsize, xlabelfontsize=labelfontsize,ylabelfontsize=labelfontsize,size=(560,480),margin=(5mm),dpi=300);
                 elseif pidx==1 
                     plot!(p,get(pvalues_dict,param,"..")[arrayindex_range],title=model_titles[arrindex],titlefonsize=title_fontsize,mean(collected_mean_errors,dims=2),label=nothing,color=colour,linewidth=3,ribbon=std(collected_mean_errors,dims=2),fillalpha=0.3,legend=false,xlabel=parameters_sweep_names[pidx],ylabel="", xtickfontsize=tickfontsize,ytickfontsize=tickfontsize,legendfontsize=legendfontsize, xlabelfontsize=labelfontsize,ylabelfontsize=labelfontsize,size=(560,480),margin=(5mm),dpi=300);
@@ -109,7 +115,7 @@ for arrindex in 5:5
                     plot!(xscale=:log10)
                 end
             else
-                if arrindex==4||arrindex==5&&pidx==1
+                if arrindex==4&&pidx==1
                     plot!(p,get(pvalues_dict,param,"..")[arrayindex_range],titlefontsize=title_fontsize,mean(collected_mean_errors,dims=2),label=model,color=colour,linewidth=3,ribbon=std(collected_mean_errors,dims=2),fillalpha=0.3,legend=:right,xlabel=parameters_sweep_names[pidx],ylabel="Mean t<sup>*</sup> (s)", xtickfontsize=tickfontsize,ytickfontsize=tickfontsize,legendfontsize=legendfontsize, xlabelfontsize=labelfontsize,ylabelfontsize=labelfontsize,size=(560,480),margin=(5mm),dpi=300);
                 elseif pidx==1
                     plot!(p,get(pvalues_dict,param,"..")[arrayindex_range],title=model_titles[arrindex],titlefontsize=title_fontsize,mean(collected_mean_errors,dims=2),label=nothing,color=colour,linewidth=3,ribbon=std(collected_mean_errors,dims=2),fillalpha=0.3,legend=false,xlabel=parameters_sweep_names[pidx],ylabel="Mean t<sup>*</sup> (s)", xtickfontsize=tickfontsize,ytickfontsize=tickfontsize,legendfontsize=legendfontsize, xlabelfontsize=labelfontsize,ylabelfontsize=labelfontsize,size=(560,480),margin=(5mm),dpi=300);
@@ -128,13 +134,13 @@ for arrindex in 5:5
             plot!(p,ylims=(0.0,7.0))
         elseif arrindex==3
             plot!(p,ylims=(0.0,2.5))
-        elseif arrindex==4
+        elseif arrindex==4||arrindex==5
             plot!(p,ylims=(0.0,2.5))
         end
         if param=="Regularisation"
-            # annotate!(p,get(pvalues_dict,param,"..")[end]*1.55,(Plots.ylims(p[1])[2])*0.95,text(case_letters[arrindex][pidx],20))
+            annotate!(p,log10(get(pvalues_dict,param,"..")[end]*1.55),(Plots.ylims(p[1])[2])*0.95,text(case_letters[arrindex][pidx],20))
         else
-            # annotate!(p,get(pvalues_dict,param,"..")[1]*1.55,(Plots.ylims(p[1])[2])*0.95,text(case_letters[arrindex][pidx],20))
+            annotate!(p,get(pvalues_dict,param,"..")[1]*1.55,(Plots.ylims(p[1])[2])*0.95,text(case_letters[arrindex][pidx],20))
         end
 
         yticks_p=yticks(p)
@@ -148,10 +154,10 @@ end
 p=plot(reshape(permutedims(reshape(plot_vector,4,4)),1,16)[1,:]...,size=(2240,1920),margin=2Plots.mm,left_margin=15mm,bottom_margin=14mm,legend_position=(0.915,0.97))
 width, height = p.attr[:size]
 Plots.prepare_output(p)
-PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/Figures/residual_physics_parameter_sweep.pdf",width=width,height=height)
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/Figures/residual_physics_parameter_sweep_withfasterasync.pdf",width=width,height=height)
 
 #fast async only plot
-p=plot(plot_vector...,size=(840,1920),layout=(4,1),margin=2Plots.mm,left_margin=15mm,bottom_margin=14mm,legend_position=(0.915,0.97))
+p=plot(plot_vector[5:8]...,size=(540,1520),layout=(4,1),margin=2Plots.mm,left_margin=15mm,bottom_margin=14mm,legend_position=(0.915,0.97))
 width, height = p.attr[:size]
 Plots.prepare_output(p)
 PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/Figures/residual_physics_parameter_sweep_async_fast.pdf",width=width,height=height)
