@@ -27,8 +27,10 @@ default(titlefontsize=20)
 
 plot_vector=Vector{Any}()
 
+
 case_letters=[["<b>a</b>","<b>e</b>","<b>i</b>","<b>m</b>"],["<b>b</b>","<b>f</b>","<b>j</b>","<b>n</b>"],["<b>c</b>","<b>g</b>","<b>k</b>","<b>o</b>"],["<b>d</b>","<b>h</b>","<b>l</b>","<b>p</b>"],["<b>b</b>","<b>f</b>","<b>j</b>","<b>n</b>"]]
-for arrindex in [1,5,3,4]
+case_letters=[["<b>a</b>","<b>e</b>","<b>i</b>","<b>m</b>"],["<b>a</b>","<b>b</b>","<b>c</b>","<b>d</b>"],["<b>c</b>","<b>g</b>","<b>k</b>","<b>o</b>"],["<b>d</b>","<b>h</b>","<b>l</b>","<b>p</b>"],["<b>a</b>","<b>b</b>","<b>c</b>","<b>d</b>"]]
+for arrindex in [5]# [1,5,3,4]
     if original_base_model=="all"
         four_models=["Synch", "Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony","Asynch_Fast"]
         base_model=four_models[arrindex]
@@ -82,7 +84,7 @@ for arrindex in [1,5,3,4]
         else
             global arrayindex_range=collect(1:1:20)
         end
-        if param=="SpectralRadius"
+        if param=="SpectralRadius"&&arrindex!=2
             
             arrayindex_range1=arrayindex_range
             arrayindex_range2=collect(1:1:5)
@@ -105,7 +107,7 @@ for arrindex in [1,5,3,4]
                         mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
                         collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests    
                 end
-                scatter!(p,[vcat(get(pvalues_dict,"SpectralRadiusLow","..")[arrayindex_range2],get(pvalues_dict,param,"..")[arrayindex_range1]) for i in 1:size(collected_mean_errors,1)],collected_mean_errors,xticks=(vcat([0.0],pticks_locations[param]),vcat([string(0)],pticks_dict[param])), color=colour,label=nothing,markersize=2,markerstrokecolor=:match,markeralpha=0.45,markerstrokewidth=0.0,size=(560,480),dpi=300);
+                scatter!(p,[vcat(get(pvalues_dict,"SpectralRadiusLow","..")[arrayindex_range2],get(pvalues_dict,param,"..")[arrayindex_range1]) for i in 1:size(collected_mean_errors,1)],collected_mean_errors,xticks=(vcat([nothing],pticks_locations[param]),vcat([string(0)],pticks_dict[param])), color=colour,label=nothing,markersize=2,markerstrokecolor=:match,markeralpha=0.45,markerstrokewidth=0.0,size=(560,480),dpi=300);
                 if arrindex>=2
                     if arrindex==4&&pidx==1
                         plot!(p,vcat(get(pvalues_dict,"SpectralRadiusLow","..")[arrayindex_range2],get(pvalues_dict,param,"..")[arrayindex_range1]),title=model_titles[arrindex],titlefontsize=title_fontsize,mean(collected_mean_errors,dims=2),label=model,color=colour,linewidth=3,ribbon=std(collected_mean_errors,dims=2),fillalpha=0.3,legend=:right,xlabel=parameters_sweep_names[pidx],ylabel="", xtickfontsize=tickfontsize,ytickfontsize=tickfontsize,legendfontsize=legendfontsize, xlabelfontsize=labelfontsize,ylabelfontsize=labelfontsize,size=(560,480),margin=(5mm),dpi=300);
@@ -135,7 +137,7 @@ for arrindex in [1,5,3,4]
                 colour=colours[idx]
                 collected_mean_errors=Array{Float64,2}(undef, length(arrayindex_range), num_reservoirs)
                 for arrayindex in arrayindex_range
-                    if arrindex!=5
+                    if arrindex!=5&&param!="SpectralRadiusLow"
                         norm_errors=Matrix(DataFrame(CSV.read("/user/work/as15635/output_data/ExtKuramoto/"*"New_Error_Metrics/"*param*"_"*model*"_"*"ExtKuramoto"*"_"*base_model*"_mean_valid_times_arrayindex_$(arrayindex).csv",DataFrame)))
                         mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
                         collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests 
@@ -147,7 +149,7 @@ for arrindex in [1,5,3,4]
                 end
                 scatter!(p,[get(pvalues_dict,param,"..")[arrayindex_range] for i in 1:size(collected_mean_errors,1)],collected_mean_errors,xticks=(pticks_locations[param],pticks_dict[param]), color=colour,label=nothing,markersize=2,markerstrokecolor=:match,markeralpha=0.45,markerstrokewidth=0.0,size=(560,480),dpi=300);
                 if arrindex>=2
-                    if arrindex==4&&pidx==1
+                    if arrindex==2&&pidx==1
                         plot!(p,get(pvalues_dict,param,"..")[arrayindex_range],title=model_titles[arrindex],titlefontsize=title_fontsize,mean(collected_mean_errors,dims=2),label=model,color=colour,linewidth=3,ribbon=std(collected_mean_errors,dims=2),fillalpha=0.3,legend=:right,xlabel=parameters_sweep_names[pidx],ylabel="", xtickfontsize=tickfontsize,ytickfontsize=tickfontsize,legendfontsize=legendfontsize, xlabelfontsize=labelfontsize,ylabelfontsize=labelfontsize,size=(560,480),margin=(5mm),dpi=300);
                     elseif pidx==1 
                         plot!(p,get(pvalues_dict,param,"..")[arrayindex_range],title=model_titles[arrindex],titlefonsize=title_fontsize,mean(collected_mean_errors,dims=2),label=nothing,color=colour,linewidth=3,ribbon=std(collected_mean_errors,dims=2),fillalpha=0.3,legend=false,xlabel=parameters_sweep_names[pidx],ylabel="", xtickfontsize=tickfontsize,ytickfontsize=tickfontsize,legendfontsize=legendfontsize, xlabelfontsize=labelfontsize,ylabelfontsize=labelfontsize,size=(560,480),margin=(5mm),dpi=300);
@@ -158,7 +160,7 @@ for arrindex in [1,5,3,4]
                         plot!(xscale=:log10)
                     end
                 else
-                    if arrindex==4&&pidx==1
+                    if arrindex==2&&pidx==1
                         plot!(p,get(pvalues_dict,param,"..")[arrayindex_range],titlefontsize=title_fontsize,mean(collected_mean_errors,dims=2),label=model,color=colour,linewidth=3,ribbon=std(collected_mean_errors,dims=2),fillalpha=0.3,legend=:right,xlabel=parameters_sweep_names[pidx],ylabel="Mean t<sup>*</sup> (s)", xtickfontsize=tickfontsize,ytickfontsize=tickfontsize,legendfontsize=legendfontsize, xlabelfontsize=labelfontsize,ylabelfontsize=labelfontsize,size=(560,480),margin=(5mm),dpi=300);
                     elseif pidx==1
                         plot!(p,get(pvalues_dict,param,"..")[arrayindex_range],title=model_titles[arrindex],titlefontsize=title_fontsize,mean(collected_mean_errors,dims=2),label=nothing,color=colour,linewidth=3,ribbon=std(collected_mean_errors,dims=2),fillalpha=0.3,legend=false,xlabel=parameters_sweep_names[pidx],ylabel="Mean t<sup>*</sup> (s)", xtickfontsize=tickfontsize,ytickfontsize=tickfontsize,legendfontsize=legendfontsize, xlabelfontsize=labelfontsize,ylabelfontsize=labelfontsize,size=(560,480),margin=(5mm),dpi=300);
@@ -201,7 +203,10 @@ Plots.prepare_output(p)
 PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/Figures/residual_physics_parameter_sweep_with_low_SR.pdf",width=width,height=height)
 
 #fast async only plot
-p=plot(plot_vector...,size=(840,1920),layout=(4,1),margin=2Plots.mm,left_margin=15mm,bottom_margin=14mm,legend_position=(0.915,0.97))
+for i in 1:4
+plot!(plot_vector[i],ylabel="Mean t<sup>*</sup> (s)",)
+end
+p=plot(plot_vector...,size=(950,950),layout=(2,2),margin=2Plots.mm,left_margin=15mm,bottom_margin=14mm,legend_position=(0.915,0.97))
 width, height = p.attr[:size]
 Plots.prepare_output(p)
-PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/Figures/residual_physics_parameter_sweep_lowSR.pdf",width=width,height=height)
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/Figures/residual_physics_parameter_sweep_fastAsync.pdf",width=width,height=height)
