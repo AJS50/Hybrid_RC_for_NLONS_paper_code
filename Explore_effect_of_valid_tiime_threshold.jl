@@ -1,7 +1,7 @@
 using Pkg; Pkg.activate(".")
 include("$(pwd())/src/HybridRCforNLONS.jl")
 using Statistics, LinearAlgebra, Plots, DataFrames, DelimitedFiles, CSV, Arrow
-import .HybridRCforNLONS: valid_time, sqr_even_indices, valid_time
+import .HybridRCforNLONS: valid_time, sqr_even_indices, valid_time, phasetoxy
 using ProgressLogging
 plotlyjs()
 
@@ -11,13 +11,14 @@ gt_input_path="/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physic
 traj_input_path="/user/work/as15635/output_data/ExtKuramoto/"
 output_path="/user/work/as15635/output_data/ExtKuramoto/VT_threshold_sweep/"
 
-regimes=["Asynch_Fast"]#,"Synch","Asynch_Fast","HeteroclinicCycles","SelfConsistentPartialSynchrony"]
+regimes=["HeteroclinicCycles"]#,"Synch","Asynch_Fast","HeteroclinicCycles","SelfConsistentPartialSynchrony"]
 
-parameter="SpectralRadius"
+parameter="InputScaling"
 test_range=1:20
 instantiation_range=1:40
 num_instantiations=instantiation_range[end]
-arrayindex=9
+arrayindex=1
+
 train_len=1000
 warmup_len=100
 test_len=2500
@@ -73,20 +74,22 @@ SpectralRadii=collect(0.1:0.1:2.0)
 Inputscales=SpectralRadii
 
 
+# mean(per_threshold_test_wise_valid_times_per_regime[1,:,1,:,:],dims=2)[:,1,:]#,dims=3)
+# per_threshold_test_wise_valid_times_per_regime
 
-per_threshold_test_wise_valid_times_per_regime
-
-p=plot(thresholds,mean(mean(per_threshold_test_wise_valid_times_per_regime[1,:,1,:,:],dims=4),dims=5)[:,1,1],color=:black,linewidth=3,label="ODE");
-plot!(p,thresholds,mean(mean(per_threshold_test_wise_valid_times_per_regime[1,:,2,:,:],dims=4),dims=5)[:,1,1],color=:red,linewidth=3,label="Hybrid");
-plot!(p,thresholds,mean(mean(per_threshold_test_wise_valid_times_per_regime[1,:,3,:,:],dims=4),dims=5)[:,1,1],color=:blue,linewidth=3,label="Standard");
-plot!(p,ylabel="Mean t<sup>*</sup> (s)",xlabel="t<sup>*</sup> threshold",legend=:outertopright,left_margin=20pt);
+p=scatter([thresholds for i in 1:size(per_threshold_test_wise_valid_times_per_regime,2)],mean(per_threshold_test_wise_valid_times_per_regime[1,:,1,:,:],dims=2)[:,1,:],color=:black,label=nothing,markeralpha=0.45,markerstrokewidth=0.0,markersize=2);
+scatter!(p,[thresholds for i in 1:size(per_threshold_test_wise_valid_times_per_regime,2)],mean(per_threshold_test_wise_valid_times_per_regime[1,:,2,:,:],dims=2)[:,1,:],color=:red,label=nothing,markeralpha=0.45,markerstrokewidth=0.0,markersize=2);
+scatter!(p,[thresholds for i in 1:size(per_threshold_test_wise_valid_times_per_regime,2)],mean(per_threshold_test_wise_valid_times_per_regime[1,:,3,:,:],dims=2)[:,1,:],color=:blue,label=nothing,markeralpha=0.45,markerstrokewidth=0.0,markersize=2);
+plot!(p,thresholds,mean(mean(per_threshold_test_wise_valid_times_per_regime[1,:,1,:,:],dims=2),dims=3)[:,1,1],ribbon=std(mean(per_threshold_test_wise_valid_times_per_regime[1,:,1,:,:],dims=2)[:,1,:],dims=2),color=:black,label="ODE",fillalpha=0.3,linewidth=2);
+plot!(p,thresholds,mean(mean(per_threshold_test_wise_valid_times_per_regime[1,:,2,:,:],dims=2),dims=3)[:,1,1],ribbon=std(mean(per_threshold_test_wise_valid_times_per_regime[1,:,2,:,:],dims=2)[:,1,:],dims=2),color=:red,label="Hybrid",fillalpha=0.3,linewidth=2);
+plot!(p,thresholds,mean(mean(per_threshold_test_wise_valid_times_per_regime[1,:,3,:,:],dims=2),dims=3)[:,1,1],ribbon=std(mean(per_threshold_test_wise_valid_times_per_regime[1,:,3,:,:],dims=2)[:,1,:],dims=2),color=:blue,label="Standard",fillalpha=0.3,linewidth=2);
+plot!(p,ylabel="Mean t<sup>*</sup> (s)",xlabel="t<sup>*</sup> threshold",legend=:outertopright,left_margin=20Plots.mm);
 plot!(p,title="$(regimes[1]), $(parameter)=$(SpectralRadii[arrayindex])",titlefontsize=14);
-plot!(p,title="Asynchronous, Spectral radius = $(SpectralRadii[arrayindex])",titlefontsize=14)
+plot!(p,title="HeteroclinicCycles, Input scaling = $(SpectralRadii[arrayindex])",titlefontsize=14)
 
 
 
 
 width,height=p.attr[:size]
 Plots.prepare_output(p)
-PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),input_path*"Figures/vary_threshold_$(regimes[1])_$(parameter)_array_index_$(arrayindex).pdf")
-
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),input_path*"/Figures/vary_threshold_$(regimes[1])_$(parameter)_array_index_$(arrayindex).pdf")
