@@ -22,11 +22,11 @@ psweep_name="InputScaling"
 
 
 ground_truth_regime=ARGS[3]
-ground_truth_regime="Synchronous" #Asynchronous, HeteroclinicCycles, SelfConsistentPartialSynchrony
+ground_truth_regime="FastAsynchronous" #Asynchronous, HeteroclinicCycles, SelfConsistentPartialSynchrony
 ground_truth_regimes=["Synchronous","FastAsynchronous","HeteroclinicCycles","SelfConsistentPartialSynchrony"]
 ode_std_hybrid_on_particular_regime=Vector{Any}()
 
-for gt in ground_truth_regimes
+for gt in ["Asynchronous",ground_truth_regime]#ground_truth_regimes
 if gt=="Synchronous"
     gt_index=1
 elseif gt=="Asynchronous"
@@ -40,7 +40,7 @@ else
 end
 
 #for titles.
-gt_type=["Synchronous","Asynchronous","Heteroclinic Cycles","Partial Synchrony","Asynchronous"]
+gt_type=["Synchronous","Asynchronous","Heteroclinic Cycles","Partial Synchrony","Asynchronous Fast (5x)"]
 #for file names.
 base_models=["Synch","Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony","Asynch_Fast"]
 base_model=base_models[gt_index]
@@ -136,8 +136,12 @@ end
 ### the trajectory plots for S15 were taken from the InputScaling sweep, array index 19, test 1, instance 1.
 ### exact trajectories will vary due to use of the default random seed in the modified_params generation.
 #plot and save the figure.
+input_path="/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task"
 p=plot(ode_std_hybrid_on_particular_regime...,layout=(2,2),size=(SIZE_COLS*2,SIZE_ROWS*2),legend=:bottom)
+p=plot(ode_std_hybrid_on_particular_regime...,layout=(2,1),size=(1000,1000),legend=:bottom)
 width,height=p.attr[:size]
 Plots.prepare_output(p)
 PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),input_path*"Figures/$(base_model)_trajectory_$(pwsweep_name)_instance_$(instance_number)_test_$(test_num)_array_index_$(arrayindex).pdf",width=width,height=height)
-PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),input_path*"Figures/GT_trajectories_fastasync.pdf",width=width,height=height)
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),input_path*"/Figures/GT_trajectories_fastasync_vs_slowasync.pdf",width=width,height=height)
+
+
