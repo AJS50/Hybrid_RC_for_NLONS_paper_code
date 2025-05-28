@@ -11,7 +11,6 @@ model_type="all"
 test_num_range=1:20
 # test_num_range=parse(Int64,ARGS[6]):parse(Int64,ARGS[7])
 input_path_base="$(pwd())/Residual_Physics_Task/"
-input_path_base="/user/work/as15635/output_data/ExtKuramoto/"
 # input_path_base=ARGS[8]
 num_reservoirs=40
 # num_reservoirs=parse(Int64,ARGS[9])
@@ -96,7 +95,7 @@ for arrindex in [1,5,3,4,2]
                         mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
                         collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests    
                     else
-                        norm_errors=Matrix(DataFrame(CSV.read("/user/work/as15635/output_data/ExtKuramoto/"*"New_Error_Metrics/"*param*"_"*model*"_"*"ExtKuramoto"*"_"*base_model*"_mean_valid_times_arrayindex_$(arrayindex).csv",DataFrame)))
+                        norm_errors=Matrix(DataFrame(CSV.read(input_path*param*"_"*model*"_"*"ExtKuramoto"*"_"*base_model*"_mean_valid_times_arrayindex_$(arrayindex).csv",DataFrame)))
                         mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
                         collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests
                     end
@@ -153,19 +152,19 @@ end
 
 #load const model data and add to the figure appropriately:
 
-const_HC_vts=Matrix(DataFrame(CSV.read("/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/ConstantModelPredictions/ConstModel_Biharmonic_Kuramoto_HC_valid_times.csv",DataFrame)))
+const_HC_vts=Matrix(DataFrame(CSV.read("$(pwd())/Residual_Physics_Task/ConstantModelPredictions/ConstModel_Biharmonic_Kuramoto_HC_valid_times.csv",DataFrame)))
 const_HC_mean=mean(const_HC_vts[:,test_num_range],dims=2)[1,1]
 const_HC_std=std(const_HC_vts[:,test_num_range],dims=2)[1,1]
-const_AF_vts=Matrix(DataFrame(CSV.read("/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/ConstantModelPredictions/ConstModel_Biharmonic_Kuramoto_AF_valid_times.csv",DataFrame)))
+const_AF_vts=Matrix(DataFrame(CSV.read("$(pwd())/Residual_Physics_Task/ConstantModelPredictions/ConstModel_Biharmonic_Kuramoto_AF_valid_times.csv",DataFrame)))
 const_AF_mean=mean(const_AF_vts[:,test_num_range],dims=2)[1,1]
 const_AF_std=std(const_AF_vts[:,test_num_range],dims=2)[1,1]
-const_AS_vts=Matrix(DataFrame(CSV.read("/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/ConstantModelPredictions/ConstModel_Biharmonic_Kuramoto_AS_valid_times.csv",DataFrame)))
+const_AS_vts=Matrix(DataFrame(CSV.read("$(pwd())/Residual_Physics_Task/ConstantModelPredictions/ConstModel_Biharmonic_Kuramoto_AS_valid_times.csv",DataFrame)))
 const_AS_mean=mean(const_AS_vts[:,test_num_range],dims=2)[1,1]
 const_AS_std=std(const_AS_vts[:,test_num_range],dims=2)[1,1]
-const_sync_vts=Matrix(DataFrame(CSV.read("/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/ConstantModelPredictions/ConstModel_Biharmonic_Kuramoto_sync_valid_times.csv",DataFrame)))
+const_sync_vts=Matrix(DataFrame(CSV.read("$(pwd())/Residual_Physics_Task/ConstantModelPredictions/ConstModel_Biharmonic_Kuramoto_sync_valid_times.csv",DataFrame)))
 const_sync_mean=mean(const_sync_vts[:,test_num_range],dims=2)[1,1]
 const_sync_std=std(const_sync_vts[:,test_num_range],dims=2)[1,1]
-const_SCPS_vts=Matrix(DataFrame(CSV.read("/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/ConstantModelPredictions/ConstModel_Biharmonic_Kuramoto_SCPS_valid_times.csv",DataFrame)))
+const_SCPS_vts=Matrix(DataFrame(CSV.read("$(pwd())/Residual_Physics_Task/ConstantModelPredictions/ConstModel_Biharmonic_Kuramoto_SCPS_valid_times.csv",DataFrame)))
 const_SCPS_mean=mean(const_SCPS_vts[:,test_num_range],dims=2)[1,1]
 const_SCPS_std=std(const_SCPS_vts[:,test_num_range],dims=2)[1,1]
 

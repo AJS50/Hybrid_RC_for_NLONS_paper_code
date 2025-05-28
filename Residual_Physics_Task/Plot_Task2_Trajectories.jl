@@ -54,7 +54,6 @@ test_num_num=parse(Int64,test_num)
 instance_number=1
 
 gt_input_path="$(pwd())/Residual_Physics_Task/"
-input_path="/user/work/as15635/output_data/ExtKuramoto/"
 # input_path=ARGS[7]
 
 
@@ -153,7 +152,7 @@ SIZE_COLS=1020
 ### the trajectory plots for S15 were taken from the InputScaling sweep, array index 19, test 1, instance 1.
 ### exact trajectories will vary due to use of the default random seed in the modified_params generation.
 #plot and save the figure.
-input_path="/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task"
+input_path="$(pwd())/Residual_Physics_Task"
 p=plot(ode_std_hybrid_on_particular_regime...,layout=(2,2),size=(SIZE_COLS*2,SIZE_ROWS*2),legend=:bottom)
 p=plot(ode_std_hybrid_on_particular_regime...,layout=(2,1),size=(1000,1000),legend=:bottom)
 width,height=p.attr[:size]

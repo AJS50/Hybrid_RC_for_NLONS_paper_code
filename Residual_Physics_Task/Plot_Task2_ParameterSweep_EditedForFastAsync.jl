@@ -11,7 +11,6 @@ model_type="all"
 test_num_range=1:20
 # test_num_range=parse(Int64,ARGS[6]):parse(Int64,ARGS[7])
 input_path_base="$(pwd())/Residual_Physics_Task/"
-input_path_base="/user/work/as15635/output_data/ExtKuramoto/"
 # input_path_base=ARGS[8]
 num_reservoirs=40
 # num_reservoirs=parse(Int64,ARGS[9])
@@ -72,7 +71,7 @@ for arrindex in [1,5,3,4]
     
     for (pidx,param) in enumerate(parameters_to_plot)
         println("plotting ", param)
-        input_path = input_path_base*param*"/"
+        input_path = input_path_base*"ParameterSweep"
         p=scatter();
         #set to range tested. (array index range is the number of tested parameter settings in the parameter sweeps. Regularisation was 10.)
         if param=="Regularisation"
@@ -96,7 +95,7 @@ for arrindex in [1,5,3,4]
                         mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
                         collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests    
                     else
-                        norm_errors=Matrix(DataFrame(CSV.read("/user/work/as15635/output_data/ExtKuramoto/"*"New_Error_Metrics/"*param*"_"*model*"_"*"ExtKuramoto"*"_"*base_model*"_mean_valid_times_arrayindex_$(arrayindex).csv",DataFrame)))
+                        norm_errors=Matrix(DataFrame(CSV.read(input_path*param*"_"*model*"_"*"ExtKuramoto"*"_"*base_model*"_mean_valid_times_arrayindex_$(arrayindex).csv",DataFrame)))
                         mean_over_tests=mean(norm_errors[test_num_range,:],dims=1)
                         collected_mean_errors[arrayindex-arrayindex_range[1]+1,:]=mean_over_tests
                     end

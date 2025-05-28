@@ -85,7 +85,7 @@ tspan=(0.0,6200.0)
 # generate_arrow(name,save_path)
 # rm(save_path*name*".csv")
 #instead load the bad gt from the HPC.
-ground_truth=Matrix(DataFrame(Arrow.Table("/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Asynch_Fast_ground_truth_data.arrow.lz4")))
+ground_truth=Matrix(DataFrame(Arrow.Table("$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Asynch_Fast_ground_truth_data.arrow.lz4")))
 ground_truth=[phasetoxy(ground_truth'[:,i]) for i in 1:size(ground_truth',2)]
 ground_truth=reduce(hcat,ground_truth)
 
@@ -257,7 +257,7 @@ end
 bigplot=plot(to_plot_for_particular_regime...,layout=(2,2),plot_title="SpectralRadius - index $(arrayindex)")
 width,height=bigplot.attr[:size]
 Plots.prepare_output(bigplot)
-PlotlyJS.savefig(Plots.plotlyjs_syncplot(bigplot),"/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Figures/$(case)_trajectory_$(psweep_name)_instance_$(instance_number)_test_$(test_num)_array_index_$(arrayindex)_WrongGTonHPC.pdf",width=width,height=height)
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(bigplot),"$(pwd())/Residual_Physics_Task/Figures/$(case)_trajectory_$(psweep_name)_instance_$(instance_number)_test_$(test_num)_array_index_$(arrayindex)_WrongGTonHPC.pdf",width=width,height=height)
 
 
 #checking kuramoto order parameter of each in the fast asynch case and the normal async case to see if that is a good metric.

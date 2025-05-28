@@ -18,7 +18,7 @@ for ai in arrayindex_range
             global base_model=four_models[arrindex]
             #load in the valid times;
             val_times_this_ai=Array{Float64,2}(undef,length(test_num_range),num_reservoirs)
-            val_times_this_ai[:,:]=Matrix(DataFrame(CSV.read(input_path_base*psweep_name*"_$(model_type)_"*"Biharmonic_Kuramoto"*"_"*base_model*"_valid_times_array_index_$(ai).csv",DataFrame)))
+            val_times_this_ai[:,:]=Matrix(DataFrame(CSV.read(input_path_base*psweep_name*"$(model_type)"*"_$(model_type)_"*"Biharmonic_Kuramoto"*"_"*base_model*"_valid_times_array_index_$(ai).csv",DataFrame)))
             mean_over_tests_val_times=mean(val_times_this_ai,dims=1)
             push!(all_data,mean_over_tests_val_times[1,:]) #collecting all valid time data together to plot below.
         end

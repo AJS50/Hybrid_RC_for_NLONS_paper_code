@@ -7,13 +7,14 @@ plotlyjs()
 
 #load in the trajectory data for all three modes and ground truth for a given psweep, arrindex.
 #The data is all tests and reservoirs
-gt_input_path="/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Settings_and_GroundTruth/"
-traj_input_path="/user/work/as15635/output_data/ExtKuramoto/"
-output_path="/user/work/as15635/output_data/ExtKuramoto/VT_threshold_sweep/"
+parameter="SpectralRadius"
+
+gt_input_path="$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/"
+traj_input_path="$(pwd())/Residual_Physics_Task/SpectralRadius/"
+output_path="$(pwd())/Residual_Physics_Task/SpectralRadius/"
 
 regimes=["Synch"]#,"Synch","Asynch_Fast","HeteroclinicCycles","SelfConsistentPartialSynchrony"]
 
-parameter="SpectralRadius"
 test_range=1:20
 instantiation_range=1:40
 num_instantiations=instantiation_range[end]
@@ -96,7 +97,7 @@ push!(plots,p)
 
 width,height=p.attr[:size]
 Plots.prepare_output(p)
-PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"/user/home/as15635/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/"*"/Figures/vary_threshold_$(regimes[1])_$(parameter)_array_index_$(arrayindex).pdf")
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/"*"/Figures/vary_threshold_$(regimes[1])_$(parameter)_array_index_$(arrayindex).pdf")
 
 
 plots

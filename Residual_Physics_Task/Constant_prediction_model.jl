@@ -5,22 +5,22 @@ import .HybridRCforNLONS: normalised_error, valid_time, xytophase,phasetoxy,gene
 
 plotlyjs()
 
-save_path="/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/ConstantModelPredictions/"
+save_path="$(pwd())/Residual_Physics_Task/ConstantModelPredictions/"
 
 #load ground truth cases from the arrow files
-gt_sync=Matrix(DataFrame(Arrow.Table("/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Synch_ground_truth_data.arrow.lz4")))
+gt_sync=Matrix(DataFrame(Arrow.Table("$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Synch_ground_truth_data.arrow.lz4")))
 gt_sync=[phasetoxy(gt_sync'[:,i]) for i in 1:size(gt_sync',2)]
 gt_sync=reduce(hcat,gt_sync)
-gt_AS=Matrix(DataFrame(Arrow.Table("/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Asynch_ground_truth_data.arrow.lz4")))
+gt_AS=Matrix(DataFrame(Arrow.Table("$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Asynch_ground_truth_data.arrow.lz4")))
 gt_AS=[phasetoxy(gt_AS'[:,i]) for i in 1:size(gt_AS',2)]
 gt_AS=reduce(hcat,gt_AS)
-gt_HC=Matrix(DataFrame(Arrow.Table("/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_HeteroclinicCycles_ground_truth_data.arrow.lz4")))
+gt_HC=Matrix(DataFrame(Arrow.Table("$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_HeteroclinicCycles_ground_truth_data.arrow.lz4")))
 gt_HC=[phasetoxy(gt_HC'[:,i]) for i in 1:size(gt_HC',2)]
 gt_HC=reduce(hcat,gt_HC)
-gt_SCPS=Matrix(DataFrame(Arrow.Table("/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_SelfConsistentPartialSynchrony_ground_truth_data.arrow.lz4")))
+gt_SCPS=Matrix(DataFrame(Arrow.Table("$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_SelfConsistentPartialSynchrony_ground_truth_data.arrow.lz4")))
 gt_SCPS=[phasetoxy(gt_SCPS'[:,i]) for i in 1:size(gt_SCPS',2)]
 gt_SCPS=reduce(hcat,gt_SCPS)
-gt_AF=Matrix(DataFrame(Arrow.Table("/Users/as15635/Documents/Projects/Hybrid_RC_for_NLONS_paper_code/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Asynch_Fast_ground_truth_data.arrow.lz4")))
+gt_AF=Matrix(DataFrame(Arrow.Table("$(pwd())/Residual_Physics_Task/Settings_and_GroundTruth/Biharmonic_Kuramoto_Asynch_Fast_ground_truth_data.arrow.lz4")))
 gt_AF=[phasetoxy(gt_AF'[:,i]) for i in 1:size(gt_AF',2)]
 gt_AF=reduce(hcat,gt_AF)
 gts=[gt_sync,gt_AS,gt_HC,gt_SCPS,gt_AF]

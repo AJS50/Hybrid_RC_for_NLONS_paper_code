@@ -71,7 +71,7 @@ for arrindex in 1:4
     
     for (pidx,param) in enumerate(parameters_to_plot)
         println("plotting ", param)
-        input_path = input_path_base*param*"/"
+        input_path = input_path_base*"ParameterSweep/"
         p=scatter();
         #set to range tested. (array index range is the number of tested parameter settings in the parameter sweeps. Regularisation was 10.)
         if param=="Regularisation"
