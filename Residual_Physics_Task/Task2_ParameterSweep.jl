@@ -1,9 +1,24 @@
 cd("..")
-using Pkg; Pkg.activate(".")
+println("script started pre loading project and packages")
+using Pkg; Pkg.activate("$(pwd())")
+println("project activated")
+flush(stdout)
+Pkg.instantiate()
+println("project instantiated")
+flush(stdout)
+ENV["JULIA_PKG_PRECOMPILE_AUTO"] = 0  # Disable automatic precompilation
+println("precompilation disabled")
+flush(stdout)
 include("$(pwd())/src/HybridRCforNLONS.jl")
+println("Hybrid_RC_for_NLONS_paper_code loaded")
+flush(stdout)
 using OrdinaryDiffEq, Random, Statistics, Distributions, LinearAlgebra, CSV, Arrow, DataFrames, DelimitedFiles
 import .HybridRCforNLONS: cartesian_kuramoto, cartesian_kuramoto_p, normalised_error, generate_ODE_data_task2, generate_arrow, ESN, Hybrid_ESN, train_reservoir!, predict!, ingest_data!, initialise_reservoir!, phasetoxy,xytophase,valid_time, sqr_even_indices
 
+println("packages loaded")
+flush(stdout)
+println("Threads: ",Base.Threads.nthreads())
+flush(stdout)
 
 arrayindex=parse(Int,ARGS[1]) #where in the parameter sweep are we? (1-20)
 # arrayindex=1
@@ -93,7 +108,7 @@ for i in 1:20
 end
 
 #save trajectories for inspection? reasonably large storage required. approx 300Gb for 20x2500step tests, 40 reservoirs, 10 oscillators.
-save_trajectories=true
+save_trajectories=false
 
 #for reservoir initialisation.
 reservoir_rng=MersenneTwister(1234+arrayindex)
@@ -107,6 +122,7 @@ if model_type=="ODE"
     dt=0.1
     #20 tests in rows, each column is a reservoir/instance.
     valid_times=Array{Float64,2}(undef,num_tests,num_instantiations)
+    println("running tests")
     for test_num in 1:num_tests
         ode_prediction=Array{Float64,2}(undef,test_len,num_instantiations*data_dim)
         for run_num in 1:num_instantiations
@@ -121,6 +137,9 @@ if model_type=="ODE"
             generate_arrow(name,save_path)
             rm(save_path*name*".csv")
         end
+        println("test number $(test_num) complete")
+        flush(stdout)
+
     end
     #save the valid times for each reservoir/instance across the 20 tests.
     name=psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_valid_times_array_index_$(arrayindex)"
@@ -131,14 +150,17 @@ elseif model_type=="Standard"
     #train each of them on the training data, and then predict the 20 test spans.
     #train all the reservoirs first
     reservoirs=Vector{ESN}()
+    println("loading reservoirs")
     for res_idx in 1:num_instantiations
         push!(reservoirs,ESN(res_size,mean_degree,data_dim,spectral_radius,scaling,g,reg_param,sqr_even_indices))
         initialise_reservoir!(reservoir_rng,reservoirs[res_idx])
         ingest_data!(reservoirs[res_idx],training_data)
         train_reservoir!(reservoirs[res_idx],target_data)
     end
+    println("reservoirs loaded")
     #20 tests in rows, each column is a reservoir/instance.
     valid_times=Array{Float64,2}(undef,num_tests,num_instantiations)
+    println("running tests")
     for test_num in 1:num_tests
         test_prediction=Array{Float64,2}(undef,test_len,num_instantiations*data_dim)
         for run_num in 1:num_instantiations
@@ -153,6 +175,8 @@ elseif model_type=="Standard"
             generate_arrow(name,save_path)
             rm(save_path*name*".csv")
         end
+        println("test number $(test_num) complete")
+        flush(stdout)
     end
     #save the valid times for each reservoir/instance across the 20 tests.
     name=psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_valid_times_array_index_$(arrayindex)"
@@ -162,14 +186,17 @@ elseif model_type=="Hybrid"
     # create 40 hybrid ESN's with the modified parameters and the same reservoir size and connectivity.
     # train each of them on the training data, and then predict the 20 test spans.
     reservoirs=Vector{Hybrid_ESN}()
+    println("loading reservoirs")
     for res_idx in 1:num_instantiations
         push!(reservoirs,Hybrid_ESN(res_size,mean_degree,model_dim,data_dim,knowledge_ratio,spectral_radius,scaling,g,reg_param,sqr_even_indices,system,modified_params[res_idx],dt))
         initialise_reservoir!(reservoir_rng,reservoirs[res_idx])
         ingest_data!(reservoirs[res_idx],training_data)
         train_reservoir!(reservoirs[res_idx],target_data)
     end
+    println("reservoirs loaded")
     #20 tests in rows, each column is a reservoir/instance.
     valid_times=Array{Float64,2}(undef,num_tests,num_instantiations)
+    println("running tests")
     for test_num in 1:num_tests
         test_prediction=Array{Float64,2}(undef,test_len,num_instantiations*data_dim)
         for run_num in 1:num_instantiations
@@ -184,6 +211,8 @@ elseif model_type=="Hybrid"
             generate_arrow(name,save_path)
             rm(save_path*name*".csv")
         end
+        println("test number $(test_num) complete")
+        flush(stdout)
     end
     #save the valid times for each reservoir/instance across the 20 tests.
     name=psweep_name*"_"*model_type*"_Biharmonic_Kuramoto_$(case)_valid_times_array_index_$(arrayindex)"

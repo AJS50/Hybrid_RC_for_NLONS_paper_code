@@ -80,5 +80,3 @@ for (ridx,regime) in enumerate(regimes)
       
 end
 
-
-#plot on equivalent to figure 9?

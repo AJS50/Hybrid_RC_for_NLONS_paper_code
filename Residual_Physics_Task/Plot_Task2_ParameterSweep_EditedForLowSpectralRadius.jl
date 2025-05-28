@@ -29,8 +29,8 @@ plot_vector=Vector{Any}()
 
 
 case_letters=[["<b>a</b>","<b>e</b>","<b>i</b>","<b>m</b>"],["<b>b</b>","<b>f</b>","<b>j</b>","<b>n</b>"],["<b>c</b>","<b>g</b>","<b>k</b>","<b>o</b>"],["<b>d</b>","<b>h</b>","<b>l</b>","<b>p</b>"],["<b>b</b>","<b>f</b>","<b>j</b>","<b>n</b>"]]
-case_letters=[["<b>a</b>","<b>e</b>","<b>i</b>","<b>m</b>"],["<b>a</b>","<b>b</b>","<b>c</b>","<b>d</b>"],["<b>c</b>","<b>g</b>","<b>k</b>","<b>o</b>"],["<b>d</b>","<b>h</b>","<b>l</b>","<b>p</b>"],["<b>a</b>","<b>b</b>","<b>c</b>","<b>d</b>"]]
-for arrindex in [5]# [1,5,3,4]
+# case_letters=[["<b>a</b>","<b>e</b>","<b>i</b>","<b>m</b>"],["<b>a</b>","<b>b</b>","<b>c</b>","<b>d</b>"],["<b>c</b>","<b>g</b>","<b>k</b>","<b>o</b>"],["<b>d</b>","<b>h</b>","<b>l</b>","<b>p</b>"],["<b>a</b>","<b>b</b>","<b>c</b>","<b>d</b>"]]
+for arrindex in [1,5,3,4]
     if original_base_model=="all"
         four_models=["Synch", "Asynch","HeteroclinicCycles","SelfConsistentPartialSynchrony","Asynch_Fast"]
         base_model=four_models[arrindex]
@@ -68,7 +68,7 @@ for arrindex in [5]# [1,5,3,4]
     RS_ticks=string.([@sprintf "%.0f" i for i in pvalues_dict["ReservoirSize"]])
     pticks_dict["ReservoirSize"]=(RS_ticks)[1:3:end]
     pticks_locations["ReservoirSize"]=pvalues_dict["ReservoirSize"][1:3:end]
-
+    pticks_dict["Regularisation"][2]="0.1   "
     model_titles=["Synchronous", "Asynchronous","Heteroclinic Cycles","Partial Synchrony","Asynchronous"]
     parameters_sweep_names=["Spectral radius ","Input scaling","Regularisation","D<sub>r</sub>"]
     
@@ -200,7 +200,7 @@ end
 p=plot(reshape(permutedims(reshape(plot_vector,4,4)),1,16)[1,:]...,size=(2240,1920),margin=2Plots.mm,left_margin=15mm,bottom_margin=14mm,legend_position=(0.915,0.97))
 width, height = p.attr[:size]
 Plots.prepare_output(p)
-PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/Figures/residual_physics_parameter_sweep_with_low_SR.pdf",width=width,height=height)
+PlotlyJS.savefig(Plots.plotlyjs_syncplot(p),"$(pwd())/Residual_Physics_Task/Figures/residual_physics_parameter_sweep_with_low_SR_fixed_ticks.pdf",width=width,height=height)
 
 #fast async only plot
 for i in 1:4
